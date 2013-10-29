@@ -76,7 +76,7 @@ class CPU():
             print(" se pide instruccion del pcb " +str(self.pcb.pid) +"\n")
             instruction = self.memoria.getInstruccion()
             return instruction
-                            
+                                   
     #metodo para saber si la CPU tiene pcb asignado
     def existPcb(self):
         return self.pcb != None
@@ -85,48 +85,24 @@ class CPU():
         print("se agrego pcb a la cpu\n")
         self.pcb = pcbNuevo
         
-        
-#manager deja de ser un thread       
-class Manager():
-    def __init__(self, kernel,cpu):
-        #threading.Thread.__init__(self)
-        self.kernel = kernel
-        self.cpu = cpu
-        
-    def callNext(self):
-        self.cpu.pcb = None
-        self.kernel.schedulerNext()
-        
-    def addScheduler(self,pcb):
-        self.kernel.agregarAlScheduler(pcb)
-
-    def evaluar(self):     
-        if cpu.existPcb():
-            if cpu.pcb.termino():
-                self.kernel.kill(cpu.pcb)
-                print("termino\n")
-                self.callNext()
-            elif cpu.pcb.isIO:
-                self.callNext() 
-                print("salio por io\n")  
-        
-# si es de cpu se sigue procesando el mismo pcb hasta que termine       
                 
 class Timer(threading.Thread):
-    def __init__(self, cpu,manager): #agregue un manager
+    def __init__(self, cpu,irqManager): 
         threading.Thread.__init__(self)
         self.cpu = cpu
-        self.manager = manager
+        self.irqManager = irqManager
+        #self.manager = manager
         
     def evaluar(self):
         instruction = self.cpu.fetch()
         if instruction != None:
-            # va a buscar a memoria la instruccion
             instruction.execute() #ejecuta la instruccion
-            self.manager.evaluar() # el manager avisa al kernel que paso con el pcb y pide proximo
-            time.sleep(5)
         else:
-            self.manager.callNext()
+            # no hay pcb asignado por eso se llama irqNew
+            irqNew = IRQNEW()
+            self.irqManager.handle(irqNew, None)
+            
+        time.sleep(5)
 
     def run(self):
         while True:
@@ -134,33 +110,73 @@ class Timer(threading.Thread):
             
                 
 class IO(threading.Thread):
-    def __init__(self,manager):
+    def __init__(self,irqManager):
         threading.Thread.__init__(self)
         self.cola = miFifo()
-        self.manager = manager
+        self.irqManager = irqManager
 
     def addInstruccion(self,io):
         self.cola.addElement(io)
         
     def existInstruction(self):
         return self.cola.size() > 0
-    
-    def addScheduler(self,pcb):
-        if not pcb.termino():
-            print("IO devolvio el pcb al scheduler")
-            self.manager.addScheduler(pcb)
+
 
     def run(self):
         while True:
             if self.existInstruction():
-                instruction = self.cola.getElement()          
-                pcb = instruction.pcb
-                pcb.incrementoPc()
-                print("procesando IO con pcb " + str(pcb.pid)+"\n")
-                print("el pc del pcb " + str(pcb.pid) +" es de " +str(pcb.pc)+"\n")
-                pcb.isIO = False #para evaluar proxima instruccion
-                self.addScheduler(pcb)
-                    #despues de evaluar debe volver al scheduler
+                instruction = self.cola.getElement()
+                print("ejecuta Intruccion I/O")
+                #lanza un alerta irqExistIO para avisar al kernel que el pcb ya salio de IO
+                irqExistIo = IRQExitIO()
+                self.irqManager.handle(irqExistIo, instruction.pcb)
+                
+class IRQIO:
+    def execute(self,pcb,kernel,irqManager):
+        pcb.incrementoPc()
+        #llamar al proximo pcb
+        kernel.schedulerNext()
+        print("procesando IO con pcb " + str(pcb.pid)+"\n")
+        print("el pc del pcb " + str(pcb.pid) +" es de " +str(pcb.pc)+"\n")
+
+
+class IRQExitIO:
+    
+    def execute(self,pcb,kernel,irqManager):
+        if not pcb.termino():
+            print("IO devolvio el pcb al scheduler")
+            kernel.agregarAlScheduler(pcb)
+            
+        else:
+            # el pcb termino, entonces envia un alerta de kill
+            irqKill = IRQKILL()
+            irqManager.handle(irqKill,pcb)
+            
+
+class IRQKILL:    
+    def execute(self,pcb,kernel,irqManager):
+        #llamar al proximo pcb
+        print(" el pcb con id " +str(pcb.pid) +" termino\n")
+        kernel.schedulerNext()
+        kernel.kill(pcb)
+        
+        
+class IRQNEW:
+    #Alerta para avisar que no hay pcb asignado a la cpu
+    #como no existe pcb, al ser execute se pasa None
+    def execute(self,pcb,kernel,irqManager):
+        kernel.schedulerNext()
+    
+
+class IRQManager:
+    def __init__(self, kernel):
+        self.kernel = kernel
+        
+
+    def handle(self, irq, pcb):
+        irq.execute(pcb,self.kernel,self)
+        
+
         
      
 #pcb = process control block
@@ -208,6 +224,10 @@ class SchedulerFifo:
         return pcb
 
     def runCpu(self):
+        #primero pongo None por si habia un pcb asignado,de esta manera lo saco y no sigue corriendo en caso
+        # en que no haya next
+        cpu.pcb = None
+        #ahora si llamo al proximo
         pcb = self.next()
         if pcb != None:
             self.cpu.addPcb(pcb)
@@ -255,11 +275,16 @@ class miFifo():
 
     def __init__(self):
         self.ls = []
+        self.semaphore = Semaphore(1)
 
     def getElement(self):
-        #saque los semaforos
+        #volvi a poner los semaforos porque hay veces que explota
+        self.semaphore.acquire()
+        element = None
         if self.existElement():
-            return self.ls.pop(0)
+            element = self.ls.pop(0)
+        self.semaphore.release()
+        return element
         
 
     def addElement(self, elem):       
@@ -283,22 +308,34 @@ class Instruction():
         self.instManager.evaluate(self)
     
     
-class InstManagerCPU():   
+class InstManagerCPU(): 
+    def __init__(self,irqManager):
+        self.irqManager = irqManager  
+        
     def evaluate(self,instruccion):
         print("evaluando instruccion de cpu\n")
         pcb = instruccion.pcb
         pcb.incrementoPc()
         print("el pc es de " +str(pcb.pc))
+        
+        if pcb.termino():
+            irqKill = IRQKILL()
+            self.irqManager.handle(irqKill,pcb)
 
 class InstManagerIO():
-    def __init__(self,io):
+    def __init__(self,io,irqManager):
         self.io = io
+        self.irqManager = irqManager
     
     def evaluate(self,instruccion):
         self.io.addInstruccion(instruccion) 
         pcb = instruccion.pcb
-        pcb.isIO = True #dato para el manager
+        #pcb.isIO = True #dato para el manager
         print("an instruction is added to the queue of isIO\n")
+        #Lanzo un irq
+        irqIO = IRQIO()
+        self.irqManager.handle(irqIO, pcb)
+        
         
 
 
@@ -311,13 +348,16 @@ cpu = CPU(memoria)
 sh = SchedulerFifo(cpu)
 disco = Disco()
 k = Kernel(sh, disco,memoria)
-manager = Manager(k,cpu)
-io = IO(manager)
+#manager = Manager(k,cpu)
+irqManager = IRQManager(k)
+io = IO(irqManager)
 
-#manager.start() #cambie run por start
 
-managerCPU = InstManagerCPU()
-managerIO =  InstManagerIO(io)
+managerCPU = InstManagerCPU(irqManager)
+managerIO =  InstManagerIO(io,irqManager)
+
+timer = Timer(cpu,irqManager) # le saque al timer el manager
+timer.start()
 
 i1 = Instruction(managerCPU)
 i2 = Instruction(managerIO)
@@ -331,7 +371,5 @@ p.addInstruction(i3)
 p.addInstruction(i4)
 
 k.run(p) #cambie start por run poque todavia no estamos seguras que el kernel sea un Thread
-timer = Timer(cpu,manager)
-timer.start()
 io.start()
 
