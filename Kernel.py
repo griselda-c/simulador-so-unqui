@@ -12,11 +12,8 @@ import random
 class Kernel():
     
     def __init__(self,scheduler, hd, memory):
-        #threading.Thread.__init__(self)
         self.pcbTable = []
         self.scheduler = scheduler
-        #self.timer = timer
-        #self.io = io
         self.cont = 0
         self.disco = hd
         self.memory = memory
@@ -91,8 +88,7 @@ class Timer(threading.Thread):
         threading.Thread.__init__(self)
         self.cpu = cpu
         self.irqManager = irqManager
-        #self.manager = manager
-        
+       
     def evaluar(self):
         instruction = self.cpu.fetch()
         if instruction != None:
@@ -186,7 +182,6 @@ class PCB:
         self.pc = 0 #cantidad de instrucciones ejecutadas
         self.estado = "new"
         self.cantInst = cantInst
-        self.isIO= False
         #self.prioridad = prioridad
 
     def termino(self):
@@ -348,7 +343,6 @@ cpu = CPU(memoria)
 sh = SchedulerFifo(cpu)
 disco = Disco()
 k = Kernel(sh, disco,memoria)
-#manager = Manager(k,cpu)
 irqManager = IRQManager(k)
 io = IO(irqManager)
 
@@ -356,7 +350,7 @@ io = IO(irqManager)
 managerCPU = InstManagerCPU(irqManager)
 managerIO =  InstManagerIO(io,irqManager)
 
-timer = Timer(cpu,irqManager) # le saque al timer el manager
+timer = Timer(cpu,irqManager)
 timer.start()
 
 i1 = Instruction(managerCPU)
@@ -370,6 +364,6 @@ p.addInstruction(i2)
 p.addInstruction(i3)
 p.addInstruction(i4)
 
-k.run(p) #cambie start por run poque todavia no estamos seguras que el kernel sea un Thread
+k.run(p) 
 io.start()
 
