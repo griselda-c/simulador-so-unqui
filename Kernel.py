@@ -7,7 +7,7 @@ Created on 24/10/2013
 import threading
 from threading import Semaphore
 import time
-import random
+#import random
 
 class Kernel():
     
@@ -28,6 +28,7 @@ class Kernel():
  
     def addProcess(self, programa):
         pcb = PCB(self.getPId(), programa.getCantInst())
+        print("se creo el pcb con id " +str(pcb.pid))
         self.pcbTable.append(pcb)
         self.loadMemory(programa, pcb) 
         self.agregarAlScheduler(pcb)
@@ -38,9 +39,9 @@ class Kernel():
 
     def getPId(self):
         self.semaphore.acquire()
-        cont = self.cont + 1
+        self.cont = self.cont + 1
         self.semaphore.release()
-        return cont
+        return self.cont
         
     def schedulerNext(self):
         self.scheduler.runCpu()
@@ -71,7 +72,7 @@ class CPU():
     def fetch(self):
         if self.existPcb():
             print(" se pide instruccion del pcb " +str(self.pcb.pid) +"\n")
-            instruction = self.memoria.getInstruccion()
+            instruction = self.memoria.getInstruccion(self.pcb)
             return instruction
                                    
     #metodo para saber si la CPU tiene pcb asignado
@@ -88,7 +89,7 @@ class Timer(threading.Thread):
         threading.Thread.__init__(self)
         self.cpu = cpu
         self.irqManager = irqManager
-       
+        
     def evaluar(self):
         instruction = self.cpu.fetch()
         if instruction != None:
@@ -228,42 +229,46 @@ class SchedulerFifo:
             self.cpu.addPcb(pcb)
 
 
-
 class Memory:
-    def __init__(self):
+    def __init__(self, mode, limit):
     #a validar
-        self.celdas = [ ]
-
-    def cargoPrograma(self, programa):
-        if self.hayEspacio():
-            #inicio = buscoCeldaLibre()
-            #agregoPrograma(inicio, programa)
-            print("hay espacio")
+        self.celdas = {} # las celdas es ahora un diccionario
+        # modo: tipos de asignacion (continua o paginacion)
+        self.mode = mode
+        mode.blockFree.append(Block(0,limit - 1)) #bloque inicial, la memoria entera
+        #limit: capacidad total de la memoria
+        self.limit = limit
             
-    #METODO SOLO DE PRUEBA DEBE SE MODIFICADO      
-    def addInstruction(self,instruction):
-        self.celdas.append(instruction)
-               
+    def addInstruction(self,index,instruction):
+        print(" en el indice " +str(index) + " se guardo instruccion " +str(instruction) + " del pcb " +str(instruction.pcb.pid))
+        self.celdas[index] = instruction
         
-    #METODO SOLO DE PRUEBA DEBE SER MODIFICADO
+        
+               
     def load(self,programa,pcb):
-        for inst in programa.instrucciones:
-            inst.pcb = pcb   #ahora cada instruccion sabe a que pcb pertenece
-            self.addInstruction(inst)
+        block = self.mode.findBlockEmpty(programa. getCantInst())
+        if block == None:
+            print(" there is not enough place in memory")
             
-        print("se cargo el programa en memoria\n")
+        else:
+            pcb.baseDirection = block.first # se le asigna la direccionBase
+            index = block.first
+            for instruction in programa.instrucciones:
+                instruction.pcb = pcb
+                self.addInstruction(index, instruction)
+                index = index + 1
             
+        
+            print("se cargo el programa en memoria\n")
             
-    def returnNumeroAleatorio(self):
-        index = random.randint(0,3)
-        return index
-      
-    #def getInstruccion(self,pc,inicio)  
+    def getInstruccion(self,pcb):
+        #modificar esto para que lo haga la MMU
+        #print(" pcb.baseDirection " +str(pcb.baseDirection) + " pc " +str(pcb.pc))
+        direction = pcb.baseDirection + pcb.pc
+        print("****la direccion retornada es " +str(direction))
+        return self.celdas[direction]
+        
 
-    def getInstruccion(self):
-        index = self.returnNumeroAleatorio()
-        instruction = self.celdas[index]
-        return instruction
        
 
 class miFifo():
@@ -311,7 +316,7 @@ class InstManagerCPU():
         print("evaluando instruccion de cpu\n")
         pcb = instruccion.pcb
         pcb.incrementoPc()
-        print("el pc es de " +str(pcb.pc))
+        print(" el pc del pcb " + str(pcb.pid) +" es de " +str(pcb.pc))
         
         if pcb.termino():
             irqKill = IRQKILL()
@@ -331,18 +336,73 @@ class InstManagerIO():
         irqIO = IRQIO()
         self.irqManager.handle(irqIO, pcb)
         
+class Block:
+    def __init__(self,first, last):
+        self.first = first
+        self.last = last
+        
+    def size(self):
+        return (self.last - self.first ) + 1
+    
+    
+class FirstFit:
+    def getBlock(self,blocks,size):
+        for block in blocks:
+            if block.size() >= size:
+                print("block size " +str(block.size()))
+                return block
+        return None
+            
+        
+class AsignacionContinua:
+    def __init__(self,typeFit):
+        self.blockFree = []
+        #typeFit es el tipo de algoritmo que va a usar (first fit, best fit, worst fit)
+        self.typeFit = typeFit
+        
+    def updateBlockFree(self,blockBefore, size):
+        if blockBefore.size > size:
+            first = size + blockBefore.first
+            last = blockBefore.last
+            newBlock = Block(first,last)
+            self.blockFree.append(newBlock)
+        self.blockFree.remove(blockBefore)
+        self.printBloquesLibres()
+           
+      
+    def printBloquesLibres(self):
+        for bloque in self.blockFree:
+            print(" el bloque libre de " +str(bloque.first) + " a " +str(bloque.last))  
+        
+    def findBlockEmpty(self,size):
+        block = self.typeFit.getBlock(self.blockFree,size)
+        if block != None:          
+            # ahora debo reacomodar el bloque
+            first = block.first
+            last = first + (size - 1)
+            # bloque que va ser usado por la memoria
+            blockUsed = Block(first, last)
+            self.updateBlockFree(block, size)
+            print("el programa ocupa el bloque inicio " +str(blockUsed.first) +" final " +str(blockUsed.last))
+            return blockUsed
+        return block
+    
+        
+        
         
 
 
 
 #hacer los schedulers que faltan
 
-
-memoria = Memory()
+firstFit = FirstFit()
+continua = AsignacionContinua(firstFit)
+memoria = Memory(continua,8)
 cpu = CPU(memoria)
 sh = SchedulerFifo(cpu)
 disco = Disco()
 k = Kernel(sh, disco,memoria)
+#manager = Manager(k,cpu)
 irqManager = IRQManager(k)
 io = IO(irqManager)
 
@@ -350,7 +410,7 @@ io = IO(irqManager)
 managerCPU = InstManagerCPU(irqManager)
 managerIO =  InstManagerIO(io,irqManager)
 
-timer = Timer(cpu,irqManager)
+timer = Timer(cpu,irqManager) # le saque al timer el manager
 timer.start()
 
 i1 = Instruction(managerCPU)
@@ -358,12 +418,49 @@ i2 = Instruction(managerIO)
 i3 = Instruction(managerCPU)
 i4 = Instruction(managerIO)
 
+i5 = Instruction(managerCPU)
+i6 = Instruction(managerIO)
+i7 = Instruction(managerCPU)
+i8 = Instruction(managerIO)
+
 p = Program("prog1")
-p.addInstruction(i1)
-p.addInstruction(i2)
-p.addInstruction(i3)
-p.addInstruction(i4)
+p.addInstruction(i1) #0
+p.addInstruction(i2) #1
+p.addInstruction(i3) #2
+p.addInstruction(i4) #3
 
-k.run(p) 
+p2 = Program("prog2")
+p2.addInstruction(i5) #4
+p2.addInstruction(i6) #5
+p2.addInstruction(i7) #6
+p2.addInstruction(i8) #7
+
+'''
+i9 = Instruction(managerCPU)
+i10 = Instruction(managerIO)
+i11 = Instruction(managerCPU)
+i12 = Instruction(managerIO)
+
+i13 = Instruction(managerCPU)
+i14 = Instruction(managerIO)
+i15 = Instruction(managerCPU)
+i16 = Instruction(managerIO)
+
+p3 = Program("prog3")
+p3.addInstruction(i9) #
+p3.addInstruction(i10) #10
+p3.addInstruction(i11) 
+p3.addInstruction(i12) 
+
+p4 = Program("prog4")
+p2.addInstruction(i5) #4
+p2.addInstruction(i6) #5
+p2.addInstruction(i7) #6
+p2.addInstruction(i8) #7
+'''
+
+
+k.run(p) #cambie start por run poque todavia no estamos seguras que el kernel sea un Thread
 io.start()
-
+k.run(p2)
+#k.run(p3)
