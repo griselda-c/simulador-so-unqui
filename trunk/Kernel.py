@@ -80,7 +80,7 @@ class CPU():
         return self.pcb != None
     
     def addPcb(self,pcbNuevo):
-        print("se agrego pcb a la cpu\n")
+        print("se agrego pcb " + str(pcbNuevo.pid)+  " a la cpu\n")
         self.pcb = pcbNuevo
         
                 
@@ -140,21 +140,24 @@ class IRQIO:
 class IRQExitIO:
     
     def execute(self,pcb,kernel,irqManager):
-        if not pcb.termino():
-            print("IO devolvio el pcb al scheduler")
-            kernel.agregarAlScheduler(pcb)
-            
-        else:
+        if pcb.termino():           
             # el pcb termino, entonces envia un alerta de kill
             irqKill = IRQKILL()
+            print("9999999999999999999999999999999999999999999999999irqkill-EXITIO-pcb " +str(pcb.pid))
             irqManager.handle(irqKill,pcb)
+            
+        else:
+            print("IO devolvio el pcb al scheduler")
+            kernel.agregarAlScheduler(pcb)
+
+            
             
 
 class IRQKILL:    
     def execute(self,pcb,kernel,irqManager):
         #llamar al proximo pcb
-        print(" el pcb con id " +str(pcb.pid) +" termino\n")
-        kernel.schedulerNext()
+        print(" 8888888888888888888888888888888888888888888888888888888888888IRQKILL-el pcb con id " +str(pcb.pid) +" termino\n")
+        #kernel.schedulerNext()
         kernel.kill(pcb)
         
         
@@ -164,17 +167,6 @@ class IRQNEW:
     def execute(self,pcb,kernel,irqManager):
         kernel.schedulerNext()
     
-
-class IRQManager:
-    def __init__(self, kernel):
-        self.kernel = kernel
-        
-
-    def handle(self, irq, pcb):
-        irq.execute(pcb,self.kernel,self)
-        
-
-        
      
 #pcb = process control block
 class PCB:
@@ -186,6 +178,8 @@ class PCB:
         #self.prioridad = prioridad
 
     def termino(self):
+        resultado = self.cantInst == self.pc
+        print(resultado)
         return self.cantInst == self.pc
 
     def incrementoPc(self):
@@ -212,7 +206,7 @@ class SchedulerFifo:
         self.cpu = cpu
 
     def addReady(self, pcb): # llamddo por Kernel al crear el PCB
-        print("el pcb con el id " +str(pcb.pid) +" esta en el scheduler\n ")
+        print("******el pcb con el id " +str(pcb.pid) +" esta en el scheduler\n ")
         self.ready.addElement(pcb)
 
     def next(self):
@@ -261,11 +255,19 @@ class Memory:
         
             print("se cargo el programa en memoria\n")
             
+    def delete(self,direction):
+        # borro el valor de esa clave
+        self.celdas[direction] = None
+                                
+            
     def getInstruccion(self,pcb):
         #modificar esto para que lo haga la MMU
         #print(" pcb.baseDirection " +str(pcb.baseDirection) + " pc " +str(pcb.pc))
         direction = pcb.baseDirection + pcb.pc
         print("****la direccion retornada es " +str(direction))
+        instruction = self.celdas[direction]
+        #ESTO NO SE SI SE ELIMINA UNA INSTRUCCION ASI PERO POR EL MOMENTO....
+        #self.delete(direction)       
         return self.celdas[direction]
         
 
@@ -306,7 +308,18 @@ class Instruction():
         
     def execute(self):
         self.instManager.evaluate(self)
-    
+
+class IRQManager:
+    def __init__(self, kernel):
+        self.kernel = kernel
+        
+
+    def handle(self, irq, pcb):
+        #print(irq)
+        irq.execute(pcb,self.kernel,self)
+        
+
+           
     
 class InstManagerCPU(): 
     def __init__(self,irqManager):
@@ -320,7 +333,10 @@ class InstManagerCPU():
         
         if pcb.termino():
             irqKill = IRQKILL()
+            irqNew = IRQNEW()
+            print("9999999999999999999999999999999999999999999999999irqkill-CPU-PCB " +str(pcb.pid) )
             self.irqManager.handle(irqKill,pcb)
+            self.irqManager.handle(irqNew,pcb)
 
 class InstManagerIO():
     def __init__(self,io,irqManager):
@@ -334,6 +350,7 @@ class InstManagerIO():
         print("an instruction is added to the queue of isIO\n")
         #Lanzo un irq
         irqIO = IRQIO()
+        print("irqio")
         self.irqManager.handle(irqIO, pcb)
         
 class Block:
@@ -361,21 +378,22 @@ class AsignacionContinua:
         self.typeFit = typeFit
         
     def updateBlockFree(self,blockBefore, size):
-        if blockBefore.size > size:
+        # si el bloque retornada resulto mas grande que el pedido, se crea un bloque nuevo con lo que resta y se elimina el bloque anterior
+        if blockBefore.size() > size:
             first = size + blockBefore.first
             last = blockBefore.last
             newBlock = Block(first,last)
             self.blockFree.append(newBlock)
         self.blockFree.remove(blockBefore)
         self.printBloquesLibres()
-           
+       
       
     def printBloquesLibres(self):
         for bloque in self.blockFree:
             print(" el bloque libre de " +str(bloque.first) + " a " +str(bloque.last))  
         
     def findBlockEmpty(self,size):
-        block = self.typeFit.getBlock(self.blockFree,size)
+        block = self.typeFit.getBlock(self.blockFree,size) # retorna un bloque
         if block != None:          
             # ahora debo reacomodar el bloque
             first = block.first
@@ -402,7 +420,6 @@ cpu = CPU(memoria)
 sh = SchedulerFifo(cpu)
 disco = Disco()
 k = Kernel(sh, disco,memoria)
-#manager = Manager(k,cpu)
 irqManager = IRQManager(k)
 io = IO(irqManager)
 
