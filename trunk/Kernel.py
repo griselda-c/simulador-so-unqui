@@ -83,6 +83,22 @@ class CPU():
         print("se agrego pcb " + str(pcbNuevo.pid)+  " a la cpu\n")
         self.pcb = pcbNuevo
         
+    def incrementarPCB(self,irqManager):
+        self.pcb.incrementoPc()       
+        if self.pcb.termino():
+            irqKill = IRQKILL()
+            irqNew = IRQNEW()
+            irqManager.handle(irqKill,pcb)
+            irqManager.handle(irqNew,pcb)
+            
+    def handleIO(self,instruccion,io,irqManager):
+        io.addInstruccion(instruccion) 
+        #Lanzo un irq
+        irqIO = IRQIO()
+        print("irqio")
+        irqManager.handle(irqIO, self.pcb)
+        
+        
                 
 class Timer(threading.Thread):
     def __init__(self, cpu,irqManager): 
@@ -93,7 +109,7 @@ class Timer(threading.Thread):
     def evaluar(self):
         instruction = self.cpu.fetch()
         if instruction != None:
-            instruction.execute() #ejecuta la instruccion
+            instruction.execute(self.cpu) #ejecuta la instruccion
         else:
             # no hay pcb asignado por eso se llama irqNew
             irqNew = IRQNEW()
@@ -113,6 +129,7 @@ class IO(threading.Thread):
         self.irqManager = irqManager
 
     def addInstruccion(self,io):
+        print("an instruction is added to the queue of isIO\n")
         self.cola.addElement(io)
         
     def existInstruction(self):
@@ -123,27 +140,25 @@ class IO(threading.Thread):
         while True:
             if self.existInstruction():
                 instruction = self.cola.getElement()
-                print("ejecuta Intruccion I/O")
+                print(instruction.message)
                 #lanza un alerta irqExistIO para avisar al kernel que el pcb ya salio de IO
                 irqExistIo = IRQExitIO()
                 self.irqManager.handle(irqExistIo, instruction.pcb)
                 
 class IRQIO:
     def execute(self,pcb,kernel,irqManager):
-        pcb.incrementoPc()
+        #pcb.incrementoPc()
         #llamar al proximo pcb
         kernel.schedulerNext()
-        print("procesando IO con pcb " + str(pcb.pid)+"\n")
-        print("el pc del pcb " + str(pcb.pid) +" es de " +str(pcb.pc)+"\n")
 
 
 class IRQExitIO:
     
     def execute(self,pcb,kernel,irqManager):
+        pcb.incrementoPc()
         if pcb.termino():           
             # el pcb termino, entonces envia un alerta de kill
             irqKill = IRQKILL()
-            print("9999999999999999999999999999999999999999999999999irqkill-EXITIO-pcb " +str(pcb.pid))
             irqManager.handle(irqKill,pcb)
             
         else:
@@ -155,9 +170,6 @@ class IRQExitIO:
 
 class IRQKILL:    
     def execute(self,pcb,kernel,irqManager):
-        #llamar al proximo pcb
-        print(" 8888888888888888888888888888888888888888888888888888888888888IRQKILL-el pcb con id " +str(pcb.pid) +" termino\n")
-        #kernel.schedulerNext()
         kernel.kill(pcb)
         
         
@@ -184,6 +196,7 @@ class PCB:
 
     def incrementoPc(self):
         self.pc = self.pc + 1
+        print(" el pc del pcb " + str(self.pid) +" es de " +str(self.pc))
 
 
 
@@ -301,13 +314,14 @@ class miFifo():
     
     
 class Instruction():
-    def __init__(self,instManager):
+    def __init__(self,instManager,message):
         self.instManager = instManager
         self.pcb = None
+        self.message = message
         
         
-    def execute(self):
-        self.instManager.evaluate(self)
+    def execute(self,cpu): #ahora conocen a la cpu
+        self.instManager.evaluate(self,cpu)
 
 class IRQManager:
     def __init__(self, kernel):
@@ -323,35 +337,20 @@ class IRQManager:
     
 class InstManagerCPU(): 
     def __init__(self,irqManager):
-        self.irqManager = irqManager  
+        self.irqManager = irqManager
         
-    def evaluate(self,instruccion):
-        print("evaluando instruccion de cpu\n")
-        pcb = instruccion.pcb
-        pcb.incrementoPc()
-        print(" el pc del pcb " + str(pcb.pid) +" es de " +str(pcb.pc))
-        
-        if pcb.termino():
-            irqKill = IRQKILL()
-            irqNew = IRQNEW()
-            print("9999999999999999999999999999999999999999999999999irqkill-CPU-PCB " +str(pcb.pid) )
-            self.irqManager.handle(irqKill,pcb)
-            self.irqManager.handle(irqNew,pcb)
+    def evaluate(self,instruccion,cpu):
+        print(instruccion.message)
+        cpu.incrementarPCB(self.irqManager) #incremente pc y evalue si termino
 
-class InstManagerIO():
+class InstManagerIO(): 
     def __init__(self,io,irqManager):
         self.io = io
         self.irqManager = irqManager
-    
-    def evaluate(self,instruccion):
-        self.io.addInstruccion(instruccion) 
-        pcb = instruccion.pcb
-        #pcb.isIO = True #dato para el manager
-        print("an instruction is added to the queue of isIO\n")
-        #Lanzo un irq
-        irqIO = IRQIO()
-        print("irqio")
-        self.irqManager.handle(irqIO, pcb)
+          
+    def evaluate(self,instruccion,cpu):
+        cpu.handleIO(instruccion,self.io,self.irqManager)
+        
         
 class Block:
     def __init__(self,first, last):
@@ -424,21 +423,22 @@ irqManager = IRQManager(k)
 io = IO(irqManager)
 
 
+
 managerCPU = InstManagerCPU(irqManager)
 managerIO =  InstManagerIO(io,irqManager)
 
-timer = Timer(cpu,irqManager) # le saque al timer el manager
+timer = Timer(cpu,irqManager) 
 timer.start()
 
-i1 = Instruction(managerCPU)
-i2 = Instruction(managerIO)
-i3 = Instruction(managerCPU)
-i4 = Instruction(managerIO)
+i1 = Instruction(managerCPU,"instruccion de cpu ejecutandose")
+i2 = Instruction(managerIO,"instruccion de IO ejecutandose")
+i3 = Instruction(managerCPU,"instruccion de cpu ejecutandose")
+i4 = Instruction(managerIO,"instruccion de IO ejecutandose")
 
-i5 = Instruction(managerCPU)
-i6 = Instruction(managerIO)
-i7 = Instruction(managerCPU)
-i8 = Instruction(managerIO)
+i5 = Instruction(managerCPU,"instruccion de cpu ejecutandose")
+i6 = Instruction(managerIO,"instruccion de IO ejecutandose")
+i7 = Instruction(managerCPU,"instruccion de cpu ejecutandose")
+i8 = Instruction(managerIO,"instruccion de IO ejecutandose")
 
 p = Program("prog1")
 p.addInstruction(i1) #0
