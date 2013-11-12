@@ -21,16 +21,17 @@ class Kernel():
 
     def kill(self, pcb):
         self.pcbTable.remove(pcb)
+        self.memory.delete(pcb)
         print("se elimino el pcb con id " + str(pcb.pid)+"\n")
         
-    def loadMemory(self,programa,pcb):
-        self.memory.load(programa,pcb)
+    def loadMemory(self,programa, pcb):
+        self.memory.load(programa, pcb)
  
     def addProcess(self, programa):
         pcb = PCB(self.getPId(), programa.getCantInst())
         print("se creo el pcb con id " +str(pcb.pid))
         self.pcbTable.append(pcb)
-        self.loadMemory(programa, pcb) 
+        self.loadMemory(programa,pcb) 
         self.agregarAlScheduler(pcb)
 
     def agregarAlScheduler(self, pcb):
@@ -62,7 +63,7 @@ class Disco:
 
     def getPrograma(self,nomProg):
     #busco el programa en la lista
-        return p    
+        return self.programa(nomProg)   
 
 class CPU():
     def __init__(self, memoria):
@@ -92,7 +93,8 @@ class CPU():
             irqManager.handle(irqNew,pcb)
             
     def handleIO(self,instruccion,io,irqManager):
-        io.addInstruccion(instruccion) 
+        tuplaInsPcb = (instruccion,self.pcb)
+        io.addInstruccion(tuplaInsPcb) #se agrego pcb
         #Lanzo un irq
         irqIO = IRQIO()
         print("irqio")
@@ -128,9 +130,9 @@ class IO(threading.Thread):
         self.cola = miFifo()
         self.irqManager = irqManager
 
-    def addInstruccion(self,io):
+    def addInstruccion(self,tupla):
         print("an instruction is added to the queue of isIO\n")
-        self.cola.addElement(io)
+        self.cola.addElement(tupla)
         
     def existInstruction(self):
         return self.cola.size() > 0
@@ -139,11 +141,12 @@ class IO(threading.Thread):
     def run(self):
         while True:
             if self.existInstruction():
-                instruction = self.cola.getElement()
+                tupla = self.cola.getElement()
+                instruction = tupla[0]
                 print(instruction.message)
                 #lanza un alerta irqExistIO para avisar al kernel que el pcb ya salio de IO
                 irqExistIo = IRQExitIO()
-                self.irqManager.handle(irqExistIo, instruction.pcb)
+                self.irqManager.handle(irqExistIo, tupla[1])
                 
 class IRQIO:
     def execute(self,pcb,kernel,irqManager):
@@ -187,6 +190,7 @@ class PCB:
         self.pc = 0 #cantidad de instrucciones ejecutadas
         self.estado = "new"
         self.cantInst = cantInst
+        self.baseDirection = 0
         #self.prioridad = prioridad
 
     def termino(self):
@@ -247,13 +251,13 @@ class Memory:
         self.limit = limit
             
     def addInstruction(self,index,instruction):
-        print(" en el indice " +str(index) + " se guardo instruccion " +str(instruction) + " del pcb " +str(instruction.pcb.pid))
+        print(" en el indice " +str(index) + " se guardo instruccion " +str(instruction))
         self.celdas[index] = instruction
         
         
                
     def load(self,programa,pcb):
-        block = self.mode.findBlockEmpty(programa. getCantInst())
+        block = self.mode.findBlockEmpty(programa.getCantInst())
         if block == None:
             print(" there is not enough place in memory")
             
@@ -261,16 +265,20 @@ class Memory:
             pcb.baseDirection = block.first # se le asigna la direccionBase
             index = block.first
             for instruction in programa.instrucciones:
-                instruction.pcb = pcb
+                #instruction.pcb = pcb
                 self.addInstruction(index, instruction)
                 index = index + 1
             
         
             print("se cargo el programa en memoria\n")
             
-    def delete(self,direction):
+    def delete(self,pcb):
         # borro el valor de esa clave
-        self.celdas[direction] = None
+        for direction in range(pcb.baseDirection,pcb.cantInst-1):
+            self.celdas[direction] = None
+        print("Borre de memoriaaaaaaaaaaaaaaaaaaa")
+        bloque = Block(pcb.baseDirection,pcb.baseDirection+pcb.cantInst)
+        self.mode.agregarBloqueLibre(bloque)
                                 
             
     def getInstruccion(self,pcb):
@@ -316,7 +324,7 @@ class miFifo():
 class Instruction():
     def __init__(self,instManager,message):
         self.instManager = instManager
-        self.pcb = None
+        #self.pcb = None
         self.message = message
         
         
@@ -403,6 +411,9 @@ class AsignacionContinua:
             print("el programa ocupa el bloque inicio " +str(blockUsed.first) +" final " +str(blockUsed.last))
             return blockUsed
         return block
+
+    def agregarBloqueLibre(self,bloque):
+        self.blockFree.append(bloque)
     
         
         
