@@ -18,7 +18,7 @@ class IO(threading.Thread):
         self.irqManager = irqManager
 
     def addInstruccion(self,tupla):
-        print("an instruction is added to the queue of isIO\n")
+        print("una instruccion fue agregada a IO\n")
         self.cola.addElement(tupla)
         
     def existInstruction(self):

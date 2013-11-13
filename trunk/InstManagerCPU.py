@@ -6,4 +6,4 @@ class InstManagerCPU():
         
     def evaluate(self,instruccion,cpu):
         print(instruccion.message)
-        cpu.incrementarPCB(self.irqManager) #incremente pc y evalue si termino
+        cpu.incrementarPCB(self.irqManager) #incrementa pc y evalua si termino

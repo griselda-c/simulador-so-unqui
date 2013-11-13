@@ -8,7 +8,7 @@ class Memory:
         # modo: tipos de asignacion (continua o paginacion)
         self.mode = mode
         mode.blockFree.append(Block(0,limit - 1)) #bloque inicial, la memoria entera
-        #limit: capacidad total de la memoria
+        #limit es la capacidad total de la memoria
         self.limit = limit
             
     def addInstruction(self,index,instruction):
@@ -20,17 +20,14 @@ class Memory:
     def load(self,programa,pcb):
         block = self.mode.findBlockEmpty(programa.getCantInst())
         if block == None:
-            print(" there is not enough place in memory")
+            print(" no hay lugar en memoria\n")
             
         else:
             pcb.baseDirection = block.first # se le asigna la direccionBase
             index = block.first
             for instruction in programa.instrucciones:
-                #instruction.pcb = pcb
                 self.addInstruction(index, instruction)
-                index = index + 1
-            
-        
+                index = index + 1       
             print("se cargo el programa en memoria\n")
             
     def delete(self,pcb):
@@ -44,10 +41,7 @@ class Memory:
             
     def getInstruccion(self,pcb):
         #modificar esto para que lo haga la MMU
-        #print(" pcb.baseDirection " +str(pcb.baseDirection) + " pc " +str(pcb.pc))
         direction = pcb.baseDirection + pcb.pc
         print("****la direccion retornada es " +str(direction))
-        instruction = self.celdas[direction]
-        #ESTO NO SE SI SE ELIMINA UNA INSTRUCCION ASI PERO POR EL MOMENTO....
-        #self.delete(direction)       
+        instruction = self.celdas[direction]     
         return self.celdas[direction]
