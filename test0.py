@@ -1,4 +1,3 @@
-
 from Disco import *
 from CPU import *
 from miFifo import *
@@ -83,4 +82,32 @@ p2.addInstruction(i8) #7
 k.run(p) #cambie start por run poque todavia no estamos seguras que el kernel sea un Thread
 io.start()
 k.run(p2)
-#k.run(p3)
+
+
+i9 = Instruction(managerCPU,"instruccion de cpu ejecutandose")
+i10 = Instruction(managerIO,"instruccion de IO ejecutandose")
+i11 = Instruction(managerCPU,"instruccion de cpu ejecutandose")
+i12 = Instruction(managerIO,"instruccion de IO ejecutandose")
+
+i13 = Instruction(managerCPU,"instruccion de cpu ejecutandose")
+i14 = Instruction(managerIO,"instruccion de IO ejecutandose")
+i15 = Instruction(managerCPU,"instruccion de cpu ejecutandose")
+i16 = Instruction(managerIO,"instruccion de IO ejecutandose")
+
+
+p3 = Program("prog3")
+p3.addInstruction(i9) #
+p3.addInstruction(i10) #10
+p3.addInstruction(i11) 
+p3.addInstruction(i12) 
+
+k.run(p3)
+
+p4 = Program("prog4")
+p2.addInstruction(i5) #4
+p2.addInstruction(i6) #5
+p2.addInstruction(i7) #6
+p2.addInstruction(i8) #7
+
+k.run(p4)
+

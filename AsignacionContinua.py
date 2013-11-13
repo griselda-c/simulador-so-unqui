@@ -30,7 +30,7 @@ class AsignacionContinua:
             # bloque que va ser usado por la memoria
             blockUsed = Block(first, last)
             self.updateBlockFree(block, size)
-            print("el programa ocupa el bloque inicio " +str(blockUsed.first) +" final " +str(blockUsed.last))
+            print("el programa ocupa el bloque (" +str(blockUsed.first) +"," +str(blockUsed.last)+")")
             return blockUsed
         return block
 
