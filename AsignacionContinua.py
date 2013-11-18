@@ -6,9 +6,11 @@ class AsignacionContinua:
         self.blockFree = []
         #typeFit es el tipo de algoritmo que va a usar (first fit, best fit, worst fit)
         self.typeFit = typeFit
+        self.blockBusy = []
         
     def updateBlockFree(self,blockBefore, size):
-        # si el bloque retornada resulto mas grande que el pedido, se crea un bloque nuevo con lo que resta y se elimina el bloque anterior
+        # si el bloque retornado resulto mas grande que el pedido, se crea un bloque 
+        # nuevo con lo que resta y se elimina el bloque anterior
         if blockBefore.size() > size:
             first = size + blockBefore.first
             last = blockBefore.last
@@ -30,6 +32,7 @@ class AsignacionContinua:
             # bloque que va ser usado por la memoria
             blockUsed = Block(first, last)
             self.updateBlockFree(block, size)
+            self.blockBusy.append(blockUsed)
             print("el programa ocupa el bloque (" +str(blockUsed.first) +"," +str(blockUsed.last)+")")
             return blockUsed
         return block

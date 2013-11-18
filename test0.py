@@ -13,11 +13,13 @@ from InstManagerIO import *
 from Timer import *
 from Instruction import *
 from Program import *
+from MMU import *
 
 firstFit = FirstFit()
 continua = AsignacionContinua(firstFit)
-memoria = Memory(continua,8)
-cpu = CPU(memoria)
+memoria = Memory(continua,6)
+mmu = MMU(memoria)
+cpu = CPU(mmu)
 sh = SchedulerFifo(cpu)
 disco = Disco()
 k = Kernel(sh, disco,memoria)

@@ -26,14 +26,20 @@ class Kernel():
         print("se elimino el pcb con id " + str(pcb.pid)+"\n")
         
     def loadMemory(self,programa, pcb):
-        self.memory.load(programa, pcb)
- 
+		return self.memory.load(programa, pcb)
+		
+    def compactacionMemoria(self):
+		self.memory.compactacion()
+
     def addProcess(self, programa):
         pcb = PCB(self.getPId(), programa.getCantInst())
         print("se creo el pcb con id " +str(pcb.pid))
-        self.pcbTable.append(pcb)
-        self.loadMemory(programa,pcb) 
-        self.agregarAlScheduler(pcb)
+        self.cargadoMemoria = self.loadMemory(programa,pcb) 
+        if self.cargadoMemoria:  
+			self.pcbTable.append(pcb)
+			self.agregarAlScheduler(pcb)
+        else:
+			self.compactacionMemoria()
 
     def agregarAlScheduler(self, pcb):
         #if not self.scheluder.isEmpty():  
