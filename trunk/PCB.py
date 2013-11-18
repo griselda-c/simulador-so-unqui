@@ -11,9 +11,8 @@ class PCB:
 
     def termino(self):
         resultado = self.cantInst == self.pc
-        print(resultado)
         return self.cantInst == self.pc
 
     def incrementoPc(self):
         self.pc = self.pc + 1
-        print(" el pc del pcb " + str(self.pid) +" es de " +str(self.pc))
+        print("PCB "+str(self.pid)+"------->PC "+str(self.pc))

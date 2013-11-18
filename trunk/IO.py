@@ -23,6 +23,9 @@ class IO(threading.Thread):
         
     def existInstruction(self):
         return self.cola.size() > 0
+    
+    def ejecutarInstruccion(self,instruccion):
+        print(instruccion.message)
 
 
     def run(self):
@@ -30,7 +33,7 @@ class IO(threading.Thread):
             if self.existInstruction():
                 tupla = self.cola.getElement()
                 instruction = tupla[0]
-                print(instruction.message)
+                self.ejecutarInstruccion(instruction)
                 #lanza un alerta irqExistIO para avisar al kernel que el pcb ya salio de IO
                 irqExistIo = IRQExitIO()
                 self.irqManager.handle(irqExistIo, tupla[1])

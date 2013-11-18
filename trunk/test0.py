@@ -17,7 +17,7 @@ from MMU import *
 
 firstFit = FirstFit()
 continua = AsignacionContinua(firstFit)
-memoria = Memory(continua,6)
+memoria = Memory(continua,8)
 mmu = MMU(memoria)
 cpu = CPU(mmu)
 sh = SchedulerFifo(cpu)
@@ -106,10 +106,10 @@ p3.addInstruction(i12)
 k.run(p3)
 
 p4 = Program("prog4")
-p2.addInstruction(i5) #4
-p2.addInstruction(i6) #5
-p2.addInstruction(i7) #6
-p2.addInstruction(i8) #7
+p4.addInstruction(i13) #4
+p4.addInstruction(i14) #5
+p4.addInstruction(i15) #6
+p4.addInstruction(i16) #7
 
 k.run(p4)
 
