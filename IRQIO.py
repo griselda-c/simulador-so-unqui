@@ -5,6 +5,6 @@ Created on 24/10/2013
 '''
 
 class IRQIO:
-    def execute(self,pcb,kernel,irqManager):
+    def execute(self,pcb,kernel):
         #llamar al proximo pcb
         kernel.schedulerNext()

@@ -14,36 +14,73 @@ class Kernel():
     
     def __init__(self,scheduler, hd, memory):
         self.pcbTable = []
+        self.esperando = []
         self.scheduler = scheduler
         self.cont = 0
         self.disco = hd
         self.memory = memory
         self.semaphore = Semaphore(1)
+        
+    def agregarPcbAEsperando(self,pcb):
+        self.esperando.append(pcb)
 
     def kill(self, pcb):
         self.pcbTable.remove(pcb)
         self.memory.delete(pcb)
-        print("se elimino el pcb con id " + str(pcb.pid)+"\n")
+        print("se elimino el PCB " + str(pcb.pid)+"\n")
+        self.enviarLosEsperando()
         
     def loadMemory(self,programa, pcb):
-		return self.memory.load(programa, pcb)
-		
+        if self.memory.hayLugar(pcb.cantInst):
+            self.memory.load(programa, pcb)
+            self.agregarAlScheduler(pcb)
+        else:
+            tupla = (programa,pcb)
+            self.esperando.append(tupla) #no hay lugar entonces se guarda en la lista de esperando
+            print("PCB "+str(pcb.pid)+"----------------> esta esperando por memoria ")
+    '''
     def compactacionMemoria(self):
-		self.memory.compactacion()
+        self.memory.compactacion()
+        
 
+        
     def addProcess(self, programa):
         pcb = PCB(self.getPId(), programa.getCantInst())
-        print("se creo el pcb con id " +str(pcb.pid))
+        print("se creo el PCB-----> " +str(pcb.pid))
         self.cargadoMemoria = self.loadMemory(programa,pcb) 
         if self.cargadoMemoria:  
-			self.pcbTable.append(pcb)
-			self.agregarAlScheduler(pcb)
+            self.pcbTable.append(pcb)
+            self.agregarAlScheduler(pcb)
         else:
-			self.compactacionMemoria()
+            self.compactacionMemoria()
+
+     '''
+    def addProcess(self, programa):
+        pcb = PCB(self.getPId(), programa.getCantInst())
+        print("se creo el PCB" +str(pcb.pid))
+        self.pcbTable.append(pcb)
+        self.loadMemory(programa,pcb) 
+           
+    def pcbEstaEnLaTablaDeProcesos(self,pcb):
+        return self.pcbTable.__contains__(pcb)
 
     def agregarAlScheduler(self, pcb):
-        #if not self.scheluder.isEmpty():  
-        self.scheduler.addReady(pcb)
+        #if not self.scheluder.isEmpty(): 
+        if not pcb.termino():
+            self.scheduler.addReady(pcb)
+        elif self.pcbEstaEnLaTablaDeProcesos(pcb): # si todavia no lo borro lo borra. es que cuando la cpu envia un instruccion
+                                                #de IO incrementa pc pero no controla si termino o no, solo controla cuando es una 
+                                                #instruccion de cpu
+            
+            self.kill(pcb)
+           # self.enviarLosEsperando()
+        
+    def enviarLosEsperando(self):
+        for i in range(0,len(self.esperando)):
+            tupla = self.esperando.pop()
+            programa = tupla[0]
+            pcb = tupla[1]
+            self.loadMemory(programa, pcb)
 
     def getPId(self):
         self.semaphore.acquire()

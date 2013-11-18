@@ -24,7 +24,7 @@ class Timer(threading.Thread):
         else:
             # no hay pcb asignado por eso se llama irqNew
             irqNew = IRQNEW()
-            self.irqManager.handle(irqNew, None)
+            self.irqManager.handle(irqNew,None) #necesita un irq y un pcb
             
         time.sleep(5)
 
