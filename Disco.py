@@ -6,11 +6,14 @@ Created on 24/10/2013
 
 class Disco:
     def __init__(self):
-        self.programas = []
+        self.programas = {}
+        #self.programas = []
 
     def addProgram(self,p):
-        self.programa.append(p)
+        self.programas[p.nombre] = p
+        #self.programa.append(p)
 
     def getPrograma(self,nomProg):
     #busco el programa en la lista
-        return self.programa(nomProg)   
+        return self.programas[nomProg]
+        #return self.programa(nomProg)   
