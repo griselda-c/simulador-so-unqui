@@ -54,7 +54,9 @@ class Memory:
             
     def delete(self,pcb):
         # borro el valor de esa clave
-        for direction in range(pcb.baseDirection,pcb.cantInst):
+        #print("pcb.baseDirection "+str(pcb.baseDirection))
+        #print("pcb.cantInst "+str(pcb.cantInst))
+        for direction in range(pcb.baseDirection,pcb.baseDirection+pcb.cantInst):
             del self.celdas[direction]
             print("Se libero la celda----> "+str(direction)+" del pcb ---->" +str(pcb.pid)+"\n")
         print("Borre de memoriaaaaaaaaaaaaaaaaaaa\n")

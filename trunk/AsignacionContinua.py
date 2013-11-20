@@ -108,7 +108,7 @@ class AsignacionContinua:
             print("el programa ocupa el bloque (" +str(blockUsed.first) +"," +str(blockUsed.last)+")")
             return blockUsed
         else:
-            self.compactacion
+            self.compactacion()
         return block
     
     def compactacion(self):

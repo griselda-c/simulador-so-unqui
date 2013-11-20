@@ -14,6 +14,8 @@ from Timer import *
 from Instruction import *
 from Program import *
 from MMU import *
+from PLP import *
+import time
 
 firstFit = FirstFit()
 continua = AsignacionContinua(firstFit)
@@ -22,7 +24,8 @@ mmu = MMU(memoria)
 cpu = CPU(mmu)
 sh = SchedulerFifo(cpu)
 disco = Disco()
-k = Kernel(sh, disco,memoria)
+plp = PLP(sh,memoria,disco)
+k = Kernel(sh, disco,memoria,plp)
 irqManager = IRQManager(k)
 io = IO(irqManager)
 
@@ -49,12 +52,14 @@ p.addInstruction(i1) #0
 p.addInstruction(i2) #1
 p.addInstruction(i3) #2
 p.addInstruction(i4) #3
+disco.addProgram(p)
 
 p2 = Program("prog2")
 p2.addInstruction(i5) #4
 p2.addInstruction(i6) #5
 p2.addInstruction(i7) #6
 p2.addInstruction(i8) #7
+disco.addProgram(p2)
 
 '''
 i9 = Instruction(managerCPU)
@@ -81,9 +86,9 @@ p2.addInstruction(i8) #7
 '''
 
 
-k.run(p) #cambie start por run poque todavia no estamos seguras que el kernel sea un Thread
+k.run("prog1") #cambie start por run poque todavia no estamos seguras que el kernel sea un Thread
 io.start()
-k.run(p2)
+k.run("prog2")
 
 
 i9 = Instruction(managerCPU,"instruccion de cpu ejecutandose")
@@ -102,14 +107,18 @@ p3.addInstruction(i9) #
 p3.addInstruction(i10) #10
 p3.addInstruction(i11) 
 p3.addInstruction(i12) 
+disco.addProgram(p3)
 
-k.run(p3)
+k.run("prog3")
+
+time.sleep(5)
 
 p4 = Program("prog4")
 p4.addInstruction(i13) #4
 p4.addInstruction(i14) #5
 p4.addInstruction(i15) #6
 p4.addInstruction(i16) #7
+disco.addProgram(p4)
 
-k.run(p4)
+k.run("prog4")
 
