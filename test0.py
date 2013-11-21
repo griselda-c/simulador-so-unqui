@@ -15,11 +15,13 @@ from Instruction import *
 from Program import *
 from MMU import *
 from PLP import *
+from WorstFit import *
 import time
 
 firstFit = FirstFit()
+worstFit = WorstFit()
 continua = AsignacionContinua(firstFit)
-memoria = Memory(continua,8)
+memoria = Memory(continua,10)
 mmu = MMU(memoria)
 cpu = CPU(mmu)
 sh = SchedulerFifo(cpu)

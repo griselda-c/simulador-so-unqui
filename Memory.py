@@ -53,16 +53,11 @@ class Memory:
             print("se cargo el programa en memoria\n")
             
     def delete(self,pcb):
-        # borro el valor de esa clave
-        #print("pcb.baseDirection "+str(pcb.baseDirection))
-        #print("pcb.cantInst "+str(pcb.cantInst))
         for direction in range(pcb.baseDirection,pcb.baseDirection+pcb.cantInst):
             del self.celdas[direction]
             print("Se libero la celda----> "+str(direction)+" del pcb ---->" +str(pcb.pid)+"\n")
         print("Borre de memoriaaaaaaaaaaaaaaaaaaa\n")
-        last = (pcb.baseDirection + pcb.cantInst) - 1 #porque la memoria empieza con direccion cero
-        bloque = Block(pcb.baseDirection,last)
-        self.mode.agregarBloque(bloque)
+        self.mode.liberarBloque(pcb.baseDirection)#buscar el bloque
                                 
     '''          
     def compactacion(self):
