@@ -28,9 +28,9 @@ class CPU():
         self.pcb.incrementoPc()      
         if self.pcb.termino():
             irqKill = IRQKILL() #mata
-            #irqNew = IRQNEW()   #llama al proximo
+            irqNew = IRQNEW()   #llama al proximo
             irqManager.handle(irqKill,self.pcb)
-            #irqManager.handle(irqNew,self.pcb)
+            irqManager.handle(irqNew,self.pcb)
             
     def handleIO(self,instruccion,io,irqManager):
         tuplaInsPcb = (instruccion,self.pcb)
