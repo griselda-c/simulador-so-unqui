@@ -10,7 +10,7 @@ class CPU():
 
     def fetch(self):
         if self.existPcb():
-            print("se pide instruccion del pcb " +str(self.pcb.pid) +"\n")
+            print("se pide instruccion del PCB " +str(self.pcb.pid) +"\n")
             instruction = self.mmu.getInstruccion(self.pcb)
             return instruction
         else:
@@ -21,7 +21,7 @@ class CPU():
         return self.pcb != None
     
     def addPcb(self,pcbNuevo):
-        print("se agrego el pcb " + str(pcbNuevo.pid)+  " a la cpu\n")
+        print("se agrego el PCB " + str(pcbNuevo.pid)+  " a la cpu\n")
         self.pcb = pcbNuevo
         
     def incrementarPCB(self,irqManager):# esto solo se ejecuta si las instruccion es de cpu
