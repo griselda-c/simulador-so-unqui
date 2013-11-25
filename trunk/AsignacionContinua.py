@@ -76,7 +76,6 @@ class AsignacionContinua:
                     
                     
     def existeBloqueContiguoArriba(self,bloque,indice):
-        #print("existe bloque contiguo arriba indice---------->"+str(indice)+"---->("+str(bloque.first)+","+str(bloque.last)+")\n")
         if indice > 0:
             bloqueDeArriba = self.blockFree[indice-1]
             return bloque.first - bloqueDeArriba.last == 1#bloqueDeArriba.last - bloque.first == -1
@@ -87,7 +86,7 @@ class AsignacionContinua:
         indiceV = indice
         if not self.yaSeUnioConElBloqueDeArriba(bloque):
             indiceV = indice + 1 # el indice varia si se unio con el de arriba o no
-        elif self.existeBloqueContiguaAbajo(bloque, indiceV):
+        if self.existeBloqueContiguaAbajo(bloque, indiceV):
             self.unirConBloqueDeABajo(bloque, indiceV)
            
                 

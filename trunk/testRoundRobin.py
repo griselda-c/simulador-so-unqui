@@ -1,3 +1,9 @@
+'''
+Created on 24/11/2013
+
+@author: Griselda
+'''
+
 from Disco import *
 from CPU import *
 from miFifo import *
@@ -25,11 +31,15 @@ continua = AsignacionContinua(firstFit)
 memoria = Memory(continua,10)
 mmu = MMU(memoria)
 cpu = CPU(mmu)
-sh = SchedulerFifo(cpu)
+#sh = SchedulerFifo(cpu)
 robin = RoundRobin(cpu)
+
+robin.start()
+
+
 disco = Disco()
-plp = PLP(sh,memoria,disco)
-k = Kernel(sh, disco,memoria,plp)
+plp = PLP(robin,memoria,disco)
+k = Kernel(robin, disco,memoria,plp)
 irqManager = IRQManager(k)
 io = IO(irqManager)
 
@@ -54,8 +64,8 @@ i8 = Instruction(managerIO,"instruccion de IO ejecutandose")
 p = Program("prog1")
 p.addInstruction(i1) #0
 p.addInstruction(i2) #1
-p.addInstruction(i3) #2
-p.addInstruction(i4) #3
+p.addInstruction(i4) #2
+p.addInstruction(i3) #3
 disco.addProgram(p)
 
 p2 = Program("prog2")
@@ -64,30 +74,6 @@ p2.addInstruction(i6) #5
 p2.addInstruction(i7) #6
 p2.addInstruction(i8) #7
 disco.addProgram(p2)
-
-'''
-i9 = Instruction(managerCPU)
-i10 = Instruction(managerIO)
-i11 = Instruction(managerCPU)
-i12 = Instruction(managerIO)
-
-i13 = Instruction(managerCPU)
-i14 = Instruction(managerIO)
-i15 = Instruction(managerCPU)
-i16 = Instruction(managerIO)
-
-p3 = Program("prog3")
-p3.addInstruction(i9) #
-p3.addInstruction(i10) #10
-p3.addInstruction(i11) 
-p3.addInstruction(i12) 
-
-p4 = Program("prog4")
-p2.addInstruction(i5) #4
-p2.addInstruction(i6) #5
-p2.addInstruction(i7) #6
-p2.addInstruction(i8) #7
-'''
 
 
 k.run("prog1") #cambie start por run poque todavia no estamos seguras que el kernel sea un Thread
@@ -125,4 +111,5 @@ p4.addInstruction(i16) #7
 disco.addProgram(p4)
 
 k.run("prog4")
+
 

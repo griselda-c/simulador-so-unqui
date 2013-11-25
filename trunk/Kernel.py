@@ -90,7 +90,7 @@ class Kernel():
         return self.cont
         
     def schedulerNext(self):
-        self.scheduler.runCpu()
+        self.scheduler.runCpu() 
 
     def run(self, nomPrograma):
         programa = self.disco.getPrograma(nomPrograma)
