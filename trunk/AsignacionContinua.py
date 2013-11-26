@@ -1,17 +1,17 @@
 
 from Block import *
-from threading import Semaphore
+from Compactador import *
 
 class AsignacionContinua:
     def __init__(self,typeFit):
         self.blockFree = [] # la lista de bloques libres debe estar ordenada
         #typeFit es el tipo de algoritmo que va a usar (first fit, best fit, worst fit)
         self.typeFit = typeFit
-        self.semaphore  = Semaphore(1)
+        #self.semaphore  = Semaphore(1)
         self.blockBusy = []
         
     def liberarBloque(self,bloqueInicio):
-        self.semaphore.acquire()
+        #self.semaphore.acquire()
         bloque = self.getBloqueUsado(bloqueInicio)
         
         indice = self.getIndice(bloque) #busca en que indice se va a guardar
@@ -24,8 +24,8 @@ class AsignacionContinua:
             self.manejarBloqueContiguoArriba(bloque, indice)
             self.manejarBloqueContiguoAbajo(bloque, indice)
       
-        self.semaphore.release()
-        self.imprimirBloquesLibres()
+        #self.semaphore.release()
+        #self.imprimirBloquesLibres()
         
     def agregarBloque(self,indice,bloque):
         self.blockFree.insert(indice, bloque)
@@ -130,25 +130,30 @@ class AsignacionContinua:
         self.imprimirBloquesLibres()
 
         
+
+    def recortarBloque(self, size, block):
+        # ahora debo reacomodar el bloque
+        first = block.first
+        last = first + (size - 1)
+    # bloque que va ser usado por la memoria
+        blockUsed = Block(first, last)
+        self.updateBlockFree(block, size)
+        self.blockBusy.append(blockUsed)
+        return blockUsed
+
     def findBlockEmpty(self,size):
         block = self.typeFit.getBlock(self.blockFree,size) # retorna un bloque
         if block != None:          
-            # ahora debo reacomodar el bloque
-            first = block.first
-            last = first + (size - 1)
-            # bloque que va ser usado por la memoria
-            blockUsed = Block(first, last)
-            self.updateBlockFree(block, size)
-            self.blockBusy.append(blockUsed)
+            blockUsed = self.recortarBloque(size, block)
             print("el programa ocupa el bloque (" +str(blockUsed.first) +"," +str(blockUsed.last)+")\n")
             return blockUsed
         else:
-            self.compactacion()
-        return block
+            block = self.compactacion()
+            blockUsed = self.recortarBloque(size, block)
+            return blockUsed
     
     def compactacion(self):
-        print("se ejecuta la compactacion")
-'''
-    def agregarBloqueLibre(self,bloque):
-        self.blockFree.agregarBloque(bloque)
-'''
+        compactador = Compactador(self)
+        compactador.compactar()
+        return self.blockFree[0] #al terminar la compactacion queda un unico bloque libre
+
