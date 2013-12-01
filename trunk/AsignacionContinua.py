@@ -7,11 +7,10 @@ class AsignacionContinua:
         self.blockFree = [] # la lista de bloques libres debe estar ordenada
         #typeFit es el tipo de algoritmo que va a usar (first fit, best fit, worst fit)
         self.typeFit = typeFit
-        #self.semaphore  = Semaphore(1)
         self.blockBusy = []
+        self.memoria = None # se setea cuando se agrega a la memoria
         
     def liberarBloque(self,bloqueInicio):
-        #self.semaphore.acquire()
         bloque = self.getBloqueUsado(bloqueInicio)
         
         indice = self.getIndice(bloque) #busca en que indice se va a guardar
@@ -23,10 +22,7 @@ class AsignacionContinua:
         else:
             self.manejarBloqueContiguoArriba(bloque, indice)
             self.manejarBloqueContiguoAbajo(bloque, indice)
-      
-        #self.semaphore.release()
-        #self.imprimirBloquesLibres()
-        
+            
     def agregarBloque(self,indice,bloque):
         self.blockFree.insert(indice, bloque)
         
@@ -141,19 +137,19 @@ class AsignacionContinua:
         self.blockBusy.append(blockUsed)
         return blockUsed
 
-    def findBlockEmpty(self,size):
+    def findBlockEmpty(self,size,memory):
         block = self.typeFit.getBlock(self.blockFree,size) # retorna un bloque
         if block != None:          
             blockUsed = self.recortarBloque(size, block)
             print("el programa ocupa el bloque (" +str(blockUsed.first) +"," +str(blockUsed.last)+")\n")
             return blockUsed
         else:
-            block = self.compactacion()
+            block = self.compactacion(memory)
             blockUsed = self.recortarBloque(size, block)
             return blockUsed
     
-    def compactacion(self):
+    def compactacion(self,memory):
         compactador = Compactador(self)
-        compactador.compactar()
+        compactador.compactar(memory)
         return self.blockFree[0] #al terminar la compactacion queda un unico bloque libre
 
