@@ -3,11 +3,6 @@ Created on 25/11/2013
 
 @author: Griselda
 '''
-'''
-Created on 24/11/2013
-
-@author: Griselda
-'''
 
 from Disco import *
 from CPU import *
@@ -36,6 +31,7 @@ continua = AsignacionContinua(firstFit)
 memoria = Memory(continua,10)
 mmu = MMU(memoria)
 cpu = CPU(mmu)
+
 #sh = SchedulerFifo(cpu)
 robin = RoundRobin(cpu)
 

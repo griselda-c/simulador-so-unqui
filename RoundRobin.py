@@ -33,7 +33,7 @@ class RoundRobin(threading.Thread):
     def desalojarPCBAnterior(self):
         pcb = self.cpu.pcb
         if pcb != None:
-            self.cpu.pcb = None
+            self.cpu.addPcb(None)
             print("PCB  "+str(pcb.pid)+" fue desalojado por el roundRobin\n")
             
     def runCpu(self):
@@ -42,6 +42,7 @@ class RoundRobin(threading.Thread):
         pcb = self.next()
         if pcb != None:
             self.cpu.addPcb(pcb)
+            print("se agrego el PCB " + str(pcb.pid)+  " a la cpu\n")
             
     def run(self):
         while True:

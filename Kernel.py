@@ -22,8 +22,6 @@ class Kernel():
         self.semaphore = Semaphore(1)
         self.plp = plp
         
-    #def agregarPcbAEsperando(self,pcb):
-     #   self.esperando.append(pcb)
 
     def kill(self, pcb):
         self.pcbTable.remove(pcb)
@@ -31,31 +29,6 @@ class Kernel():
         print("se elimino el PCB " + str(pcb.pid)+"\n")
         self.plp.enviarLosEsperando()
         
-    #def loadMemory(self,programa, pcb):
-    #    if self.memory.hayLugar(pcb.cantInst):
-    #        self.memory.load(programa, pcb)
-    #        self.agregarAlScheduler(pcb)
-    #    else:
-    #        tupla = (programa,pcb)
-    #        self.esperando.append(tupla) #no hay lugar entonces se guarda en la lista de esperando
-    #        print("PCB "+str(pcb.pid)+"----------------> esta esperando por memoria ")
-    '''
-    def compactacionMemoria(self):
-        self.memory.compactacion()
-        
-
-        
-    def addProcess(self, programa):
-        pcb = PCB(self.getPId(), programa.getCantInst())
-        print("se creo el PCB-----> " +str(pcb.pid))
-        self.cargadoMemoria = self.loadMemory(programa,pcb) 
-        if self.cargadoMemoria:  
-            self.pcbTable.append(pcb)
-            self.agregarAlScheduler(pcb)
-        else:
-            self.compactacionMemoria()
-
-     '''
     def addProcess(self, programa):
         pcb = PCB(self.getPId(), programa.getCantInst(), programa.nombre)
         print("se creo el PCB" +str(pcb.pid))
@@ -74,14 +47,6 @@ class Kernel():
                                                 #instruccion de cpu
             
             self.kill(pcb)
-           # self.enviarLosEsperando()
-        
-    #def enviarLosEsperando(self):
-     #   for i in range(0,len(self.esperando)):
-     #      tupla = self.esperando.pop()
-     #       programa = tupla[0]
-     #       pcb = tupla[1]
-     #       self.loadMemory(programa, pcb)
 
     def getPId(self):
         self.semaphore.acquire()

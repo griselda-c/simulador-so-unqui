@@ -22,35 +22,16 @@ class Memory:
         resultado = self.getCantCeldasLibres() >= tamanio
         print("Hay lugar en memoria ----->"+str(resultado)+"\n")
         return resultado
-    '''           
+  
     def load(self,programa,pcb):
-        flagCarga = True
-        block = self.mode.findBlockEmpty(programa.getCantInst())
-        if block == None:
-            print(" no hay lugar en memoria\n")
-            flagCarga = False
-        else:
-            pcb.baseDirection = block.first # se le asigna la direccionBase
-            index = block.first
-            for instruction in programa.instrucciones:
-                self.addInstruction(index, instruction)
-                index = index + 1       
-            print("se cargo el programa en memoria\n")
-        return flagCarga
-        
-    '''
-    def load(self,programa,pcb):
-        block = self.mode.findBlockEmpty(programa.getCantInst())
-        if block == None:
-            print("compactacion\n")
-            
-        else:
-            pcb.baseDirection = block.first # se le asigna la direccionBase
-            index = block.first
-            for instruccion in programa.instrucciones:
-                self.addInstruction(index, instruccion)
-                index = index + 1       
-            print("se cargo el programa en memoria\n")
+        block = self.mode.findBlockEmpty(programa.getCantInst(),self)#agrego aca la memoria
+        pcb.baseDirection = block.first # se le asigna la direccionBase
+        index = block.first
+        for instruccion in programa.instrucciones:
+            instruccion.setPcb(pcb)
+            self.addInstruction(index, instruccion)
+            index = index + 1       
+        print("se cargo el programa en memoria\n")
             
     def delete(self,pcb):
         for direction in range(pcb.baseDirection,pcb.baseDirection+pcb.cantInst):
@@ -59,8 +40,4 @@ class Memory:
         print("Borre de memoriaaaaaaaaaaaaaaaaaaa\n")
         self.mode.liberarBloque(pcb.baseDirection)#buscar el bloque
                                 
-    '''          
-    def compactacion(self):
-        print("se ejecuta la compactacion")
-        
-    '''
+   

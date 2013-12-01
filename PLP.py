@@ -20,8 +20,6 @@ class PLP:
     def enviarLosEsperando(self):
         for i in range(0,self.esperando.size()):
             pcb = self.esperando.getElement()
-            #programa = tupla[0]
-            #pcb = tupla[1]
             programa = self.disco.getPrograma(pcb.nomPrograma)
             self.loadMemory(programa, pcb)
             
@@ -30,7 +28,6 @@ class PLP:
             self.memory.load(programa, pcb)
             self.agregarAlScheduler(pcb)
         else:
-            #tupla = (programa,pcb)
             self.esperando.addElement(pcb) #no hay lugar entonces se guarda en la lista de esperando
             print("PCB "+str(pcb.pid)+"----------------> esta esperando por memoria ")
             
