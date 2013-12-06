@@ -9,27 +9,43 @@ class Paginacion:
         self.memoria = None # se setea cuando se agrega a la memoria
         self.tablaPaginas = []
         self.disco = disco
-        self.blockFree = [] # solo por el momento!!
         self.tamanioMarco = tamanioMarco
 
-    def hayLugar(self,tamanio,limit,celdas):
-		resultado = True
-		return resultado
-
-	# no utilizo CantInst
-    def findBlockEmpty(self,CantInst,memoria):
+    def findBlockEmpty(self,programa,pcb,memoria):
 		print("METODO: findBlockEmpty")
 		if not self.hayMarcoLibre(memoria):
 			self.swapOut()
 		# pagina = self.swapIn()
-		# return = pagina
-		# BLOQUE PROVISORIO  !!!!!!!!!!
-		return Block(0,self.tamanioMarco)
+		return self.getPagina(programa,pcb)
+	
+    def getPagina(self,programa,pcb):
+		print("METODO: getPagina")
+		listaPaginas = self.armoListaPaginas(programa)
+		pagina = self.pagInstrucAEjecutar(listaPaginas,pcb)
+	
+    def armoListaPaginas(self,programa):
+		print("METODO: armoListaPaginas")
+		listaPaginas = []
+		while index <= programa.getCantInst():
+			pagina = Pagina(index,self.tamanioMarco)
+			pagina = self.cargoIntrucPagina(pagina,programa,index,tamanioMarco)
+			index = index + self.tamanioMarco
+			listaPaginas.append(pagina)
+		return listaPaginas
+		
+	def cargoIntrucPagina(self,pagina,programa,inicio,tamanioMarco):
+		print("METODO: cargoIntrucPagina")
+		
+		
+	def pagInstrucAEjecutar(self,listaPaginas,pcb):
+		print("METODO: pagInstrucAEjecutar")
 	
     def hayMarcoLibre(self,memoria):
 		print("METODO: hayMarcoLibre")
 		self.memoria = memoria
-		return self.memoria.existeMarcoLibre(self.tamanioMarco)
+		resultado = self.memoria.hayLugar(self.tamanioMarco)
+		print("hay Marco Libre: "+str(resultado))
+		return resultado
 
     def swapOut(self):
 		print("METODO: swapOut")
