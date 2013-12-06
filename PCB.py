@@ -12,7 +12,7 @@ class PCB:
 
     def termino(self):
         resultado = self.cantInst == self.pc
-        return self.cantInst == self.pc
+        return self.pc >= self.cantInst
 
     def incrementoPc(self):
         self.pc = self.pc + 1

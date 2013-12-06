@@ -7,7 +7,7 @@ class Memory:
         self.celdas = {} # las celdas es ahora un diccionario
         # modo: tipos de asignacion (continua o paginacion)
         self.mode = mode
-        mode.blockFree.append(Block(0,limit - 1)) #bloque inicial, la memoria entera
+        mode.crearLibres(limit)
         #limit es la capacidad total de la memoria
         self.limit = limit
             
@@ -24,20 +24,12 @@ class Memory:
         return resultado
   
     def load(self,programa,pcb):
-        block = self.mode.findBlockEmpty(programa.getCantInst(),self)#agrego aca la memoria
-        pcb.baseDirection = block.first # se le asigna la direccionBase
-        index = block.first
-        for instruccion in programa.instrucciones:
-            instruccion.setPcb(pcb)
-            self.addInstruction(index, instruccion)
-            index = index + 1       
-        print("se cargo el programa en memoria\n")
+        block = self.mode.guardar(self,programa,pcb)
+        
             
     def delete(self,pcb):
-        for direction in range(pcb.baseDirection,pcb.baseDirection+pcb.cantInst):
-            del self.celdas[direction]
-            print("Se libero la celda----> "+str(direction)+" del pcb ---->" +str(pcb.pid)+"\n")
-        print("Borre de memoriaaaaaaaaaaaaaaaaaaa\n")
-        self.mode.liberarBloque(pcb.baseDirection)#buscar el bloque
+        self.mode.liberar(self,pcb) 
+        
+       
                                 
    
