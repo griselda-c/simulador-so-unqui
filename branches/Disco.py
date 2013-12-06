@@ -26,4 +26,3 @@ class Disco:
     def addPagina(self,pag):
         self.paginas[pag.direInicial] = pag
         
-
