@@ -147,6 +147,27 @@ class AsignacionContinua:
             block = self.compactacion(memory)
             blockUsed = self.recortarBloque(size, block)
             return blockUsed
+        
+        
+    def guardar(self,memoria,programa,pcb):
+        block = self.findBlockEmpty(programa.getCantInst(),memoria)
+        pcb.baseDirection = block.first # se le asigna la direccionBase
+        index = block.first
+        for instruccion in programa.instrucciones:
+            instruccion.setPcb(pcb)
+            memoria.addInstruction(index, instruccion)
+            index = index + 1       
+        print("se cargo el programa en memoria\n")
+        
+    def liberar(self,memoria,pcb):
+        for direction in range(pcb.baseDirection,pcb.baseDirection+pcb.cantInst):
+             del memoria.celdas[direction]
+             print("Se libero la celda----> "+str(direction)+" del pcb ---->" +str(pcb.pid)+"\n")
+        print("Borre de memoriaaaaaaaaaaaaaaaaaaa\n")
+        self.liberarBloque(pcb.baseDirection)#buscar el bloque
+        
+    def crearLibres(self,numeroDeCeldas):
+        self.blockFree.append(Block(0,numeroDeCeldas - 1))
     
     def compactacion(self,memory):
         compactador = Compactador(self)

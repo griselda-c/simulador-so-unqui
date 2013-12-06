@@ -76,7 +76,7 @@ p2.addInstruction(i8) #7
 disco.addProgram(p2)
 
 
-k.run("prog1") #cambie start por run poque todavia no estamos seguras que el kernel sea un Thread
+k.run("prog1")
 io.start()
 k.run("prog2")
 
