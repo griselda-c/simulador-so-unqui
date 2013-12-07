@@ -11,7 +11,6 @@ class PCB:
         self.nomPrograma = nomPrograma
 
     def termino(self):
-        resultado = self.cantInst == self.pc
         return self.pc >= self.cantInst
 
     def incrementoPc(self):

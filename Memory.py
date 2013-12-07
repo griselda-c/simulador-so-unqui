@@ -24,7 +24,7 @@ class Memory:
         return resultado
   
     def load(self,programa,pcb):
-        block = self.mode.guardar(self,programa,pcb)
+        self.mode.guardar(self,programa,pcb)
         
             
     def delete(self,pcb):
