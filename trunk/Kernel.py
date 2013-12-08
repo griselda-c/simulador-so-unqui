@@ -14,7 +14,6 @@ class Kernel():
     
     def __init__(self,scheduler, hd, memory, plp):
         self.pcbTable = []
-        #self.esperando = []
         self.scheduler = scheduler
         self.cont = 0
         self.disco = hd
@@ -25,7 +24,7 @@ class Kernel():
 
     def kill(self, pcb):
         self.pcbTable.remove(pcb)
-        self.memory.delete(pcb)
+        self.memory.delete(pcb,self.plp.mode)
         print("se elimino el PCB " + str(pcb.pid)+"\n")
         self.plp.enviarLosEsperando()
         
@@ -59,6 +58,6 @@ class Kernel():
 
     def run(self, nomPrograma):
         programa = self.disco.getPrograma(nomPrograma)
-    #se carga en memoria   
+		#se carga en memoria   
         self.addProcess(programa)
         
