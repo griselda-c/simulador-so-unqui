@@ -24,8 +24,8 @@ class Memory:
         mode.guardar(self,programa,pcb)
         
             
-    def delete(self,pcb):
-        self.mode.liberar(self,pcb) 
+    def delete(self,pcb,mode):
+        mode.liberar(self,pcb) 
         
        
                                 
