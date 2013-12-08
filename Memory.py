@@ -12,14 +12,9 @@ class Memory:
         print("en el indice " +str(index) + " se guardo instruccion " +str(instruction)+"\n")
         self.celdas[index] = instruction
         
-    def getCantCeldasLibres(self):
-        return self.limit - len(self.celdas)
-        
-    def hayLugar(self,tamanio):
-        resultado = self.getCantCeldasLibres() >= tamanio
-        print("Hay lugar en memoria ----->"+str(resultado)+"\n")
-        return resultado
-  
+    def hayLugar(self,tamanio,mode):
+		return mode.hayLugar(tamanio,self.limit,self)
+ 
     def load(self,programa,pcb,mode):
         mode.guardar(self,programa,pcb)
         
