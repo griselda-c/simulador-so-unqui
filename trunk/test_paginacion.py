@@ -59,13 +59,13 @@ p.addInstruction(i2) #1
 p.addInstruction(i3) #2
 p.addInstruction(i4) #3
 disco.addProgram(p)
-
+i9 = Instruction(managerCPU,"instruccion de cpu ejecutandose")
 p2 = Program("prog2")
 p2.addInstruction(i5) #4
 p2.addInstruction(i6) #5
 p2.addInstruction(i7) #6
 p2.addInstruction(i8) #7
-p2.addInstruction(i17) #7
+p2.addInstruction(i9) #7
 disco.addProgram(p2)
 
 k.run("prog1") #cambie start por run poque todavia no estamos seguras que el kernel sea un Thread
@@ -73,7 +73,7 @@ io.start()
 k.run("prog2")
 
 
-i9 = Instruction(managerCPU,"instruccion de cpu ejecutandose")
+
 i10 = Instruction(managerIO,"instruccion de IO ejecutandose")
 i11 = Instruction(managerCPU,"instruccion de cpu ejecutandose")
 i12 = Instruction(managerIO,"instruccion de IO ejecutandose")

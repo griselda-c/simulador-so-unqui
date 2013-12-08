@@ -173,4 +173,9 @@ class AsignacionContinua:
         compactador = Compactador(self)
         compactador.compactar(memory)
         return self.blockFree[0] #al terminar la compactacion queda un unico bloque libre
-
+        
+    def hayLugar(self,tamanio,limit,memoria):
+		cantCeldasLibres = limit - len(memoria.celdas)
+		resultado = cantCeldasLibres >= tamanio
+		print("Hay lugar en memoria ----->"+str(resultado)+"\n")
+		return resultado

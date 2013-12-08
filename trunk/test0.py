@@ -22,18 +22,16 @@ import time
 firstFit = FirstFit()
 worstFit = WorstFit()
 continua = AsignacionContinua(firstFit)
-memoria = Memory(continua,10)
+memoria = Memory(10)
 mmu = MMU(memoria)
 cpu = CPU(mmu)
 sh = SchedulerFifo(cpu)
 robin = RoundRobin(cpu)
 disco = Disco()
-plp = PLP(sh,memoria,disco)
+plp = PLP(sh,memoria,disco,continua)
 k = Kernel(sh, disco,memoria,plp)
 irqManager = IRQManager(k)
 io = IO(irqManager)
-
-
 
 managerCPU = InstManagerCPU(irqManager)
 managerIO =  InstManagerIO(io,irqManager)

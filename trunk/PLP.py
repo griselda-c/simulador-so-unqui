@@ -26,7 +26,7 @@ class PLP:
             self.loadMemory(programa, pcb)
             
     def loadMemory(self,programa, pcb):
-        if self.memory.hayLugar(pcb.cantInst):
+        if self.memory.hayLugar(pcb.cantInst,self.mode):
             self.memory.load(programa,pcb,self.mode)
             self.agregarAlScheduler(pcb)
         else:
