@@ -2,12 +2,9 @@
 from Block import *
 
 class Memory:
-    def __init__(self, mode, limit):
+    def __init__(self, limit):
     #a validar
         self.celdas = {} # las celdas es ahora un diccionario
-        # modo: tipos de asignacion (continua o paginacion)
-        self.mode = mode
-        mode.crearLibres(limit)
         #limit es la capacidad total de la memoria
         self.limit = limit
             
@@ -23,8 +20,8 @@ class Memory:
         print("Hay lugar en memoria ----->"+str(resultado)+"\n")
         return resultado
   
-    def load(self,programa,pcb):
-        self.mode.guardar(self,programa,pcb)
+    def load(self,programa,pcb,mode):
+        mode.guardar(self,programa,pcb)
         
             
     def delete(self,pcb):

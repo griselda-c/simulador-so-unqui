@@ -13,7 +13,7 @@ from InstManagerIO import *
 from Timer import *
 from Instruction import *
 from Program import *
-from MMU import *
+from MMU_paginacion import *
 from PLP import *
 from WorstFit import *
 from RoundRobin import *
@@ -22,13 +22,14 @@ import time
 firstFit = FirstFit()
 worstFit = WorstFit()
 disco = Disco()
-pag = Paginacion(disco,4)
-memoria = Memory(pag,12)
-mmu = MMU(memoria)
+
+memoria = Memory(12)
+mmu = MMU_paginacion(memoria)
+pag = Paginacion(disco,4,mmu)
 cpu = CPU(mmu)
 sh = SchedulerFifo(cpu)
 robin = RoundRobin(cpu)
-plp = PLP(sh,memoria,disco)
+plp = PLP(sh,memoria,disco,pag)
 k = Kernel(sh, disco,memoria,plp)
 irqManager = IRQManager(k)
 io = IO(irqManager)
