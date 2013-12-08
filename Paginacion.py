@@ -61,21 +61,28 @@ class Paginacion:
 
     def liberar(self,memoria,pcb):
 		print("METODO: liberar")
-		direInicioPag = self.buscaDireInicioPag(pcb)
+		listaPag = self.mmu.tablaPaginas[pcb.pid]
+		for pagina in listaPag:
+			direInicioPag = pagina * self.tamanioPag
+			self.limpioCeldas(direInicioPag,memoria,pcb)
+		self.listaMarcosLibres.extend(listaPag)
+		#self.listaMarcosOcupados.remove(listaPag)
+		del self.mmu.tablaPaginas[pcb.pid]
+			
+    def limpioCeldas(self,direInicioPag,memoria,pcb):
+		print("METODO: limpioCeldas")
 		for direction in range(direInicioPag, direInicioPag + self.tamanioPag):
 			del memoria.celdas[direction]
 			print("Se libero la celda----> "+str(direction)+" del pcb ---->" +str(pcb.pid)+"\n")
 		print("Borre de memoria!!\n")
-		marcosALiberar = self.mmu.tablaPaginas[pcb.pid]
-		del self.mmu.tablaPaginas[pcb.pid]
-		self.listaMarcosLibres.extend(marcosALiberar)
-		#self.listaMarcosOcupados.remove(marcosALiberar)
 
+'''
     def buscaDireInicioPag(self,pcb):
 		indicePag = ( pcb.pc // self.tamanioPag ) - 1
-		print("IIIIIIIndice de pag a liberar: "+ str(indicePag))
+		print("Indice de pag a liberar: "+ str(indicePag))
 		lPaginasProceso = self.mmu.tablaPaginas[pcb.pid]
 		pagina = lPaginasProceso[indicePag]
 		desplazamiento = pcb.pc % self.tamanioPag
 		direction = (pagina*self.tamanioPag) + desplazamiento
 		return direction
+'''
