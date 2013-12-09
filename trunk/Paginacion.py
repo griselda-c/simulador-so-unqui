@@ -70,20 +70,27 @@ class Paginacion:
     def liberar(self,memoria,pcb):
 		print("METODO: liberar")
 		listaPag = self.mmu.tablaPaginas[pcb.pid]
+		contadorInstrucciones = 0
 		for pagina in listaPag:
 			direInicioPag = pagina * self.tamanioPag
-			self.limpioCeldas(direInicioPag,memoria)
+			contadorInstrucciones = self.limpioCeldas(direInicioPag,memoria,pcb,contadorInstrucciones)
 		for pagina in listaPag:
 			self.listaMarcosLibres.addElement(pagina)
 			self.listaMarcosOcupados.getElement()
 		del self.mmu.tablaPaginas[pcb.pid]
 			
-    def limpioCeldas(self,direInicioPag,memoria):
+    def limpioCeldas(self,direInicioPag,memoria,pcb,contadorInstrucciones):
 		print("METODO: limpioCeldas")
-		for direction in range(direInicioPag, direInicioPag + self.tamanioPag):
+		i = 0
+		direction = direInicioPag
+		while i < self.tamanioPag and contadorInstrucciones < pcb.cantInst:
 			del memoria.celdas[direction]
 			print("Se libero la celda----> "+str(direction)) #+" del pcb ---->" +str(pcb.pid)+"\n")
+			i = i + 1
+			direction = direction +1
+			contadorInstrucciones = contadorInstrucciones + 1
 		print("Borre de memoria!!\n")
+		return contadorInstrucciones
 
     def hayLugar(self,tamanio,limit,memoria):
 		resultado = True
