@@ -18,18 +18,20 @@ from PLP import *
 from WorstFit import *
 from RoundRobin import *
 import time
+from Asignador import *
 
 firstFit = FirstFit()
 worstFit = WorstFit()
 disco = Disco()
 
-memoria = Memory(12)
-mmu = MMU_paginacion(memoria)
-pag = Paginacion(disco,4,mmu)
-cpu = CPU(mmu)
+pag = Paginacion(disco,4)#saque el mmu
+asignador = Asignador(pag)
+memoria = Memory(12,asignador)
+#mmu = MMU_paginacion(memoria)
+cpu = CPU(asignador)
 sh = SchedulerFifo(cpu)
 robin = RoundRobin(cpu)
-plp = PLP(sh,memoria,disco,pag)
+plp = PLP(sh,memoria,disco)
 k = Kernel(sh, disco,memoria,plp)
 irqManager = IRQManager(k)
 io = IO(irqManager)

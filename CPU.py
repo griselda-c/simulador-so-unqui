@@ -3,11 +3,12 @@ from IRQIO import *
 from IRQKILL import *
 from IRQNEW import *
 from threading import Semaphore
+from Asignador import *
 
 class CPU():
-    def __init__(self, mmu):
+    def __init__(self, asignador):
         self.pcb = None
-        self.mmu = mmu
+        self.mmu = asignador.getMMU()
         self.semaforo = Semaphore(1)
 
     def fetch(self):
