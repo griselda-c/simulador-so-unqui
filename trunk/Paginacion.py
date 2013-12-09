@@ -69,7 +69,6 @@ class Paginacion:
 		return cantidadPag
 
     def liberar(self,memoria,pcb):
-        print("METODO: liberar")
         listaPag = self.mmu.tablaPaginas[pcb.pid]
         contadorInstrucciones = 0
         for pagina in listaPag:
@@ -78,7 +77,7 @@ class Paginacion:
         for pagina in listaPag:
             self.listaMarcosLibres.addElement(pagina)
             self.listaMarcosOcupados.getElement()
-            del self.mmu.tablaPaginas[pcb.pid]
+        del self.mmu.tablaPaginas[pcb.pid]
 
         
     def limpioCeldas(self,direInicioPag,memoria,pcb,contadorInstrucciones):
