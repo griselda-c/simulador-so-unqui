@@ -3,10 +3,10 @@
 
 class MMU_paginacion():
 
-    def __init__(self,memory):
+    def __init__(self,memory,tamanioPag):
 		self.memory = memory
 		self.tablaPaginas= {}
-		self.tamanioPag = None
+		self.tamanioPag = tamanioPag
 
     def getInstruccion(self,pcb):
 		indicePag = pcb.pc // self.tamanioPag

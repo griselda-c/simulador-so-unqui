@@ -8,7 +8,7 @@ class AsignacionContinua:
         #typeFit es el tipo de algoritmo que va a usar (first fit, best fit, worst fit)
         self.typeFit = typeFit
         self.blockBusy = []
-        self.memoria = None # se setea cuando se agrega a la memoria
+        #self.memoria = None # se setea cuando se agrega a la memoria
         
     def liberarBloque(self,bloqueInicio):
         bloque = self.getBloqueUsado(bloqueInicio)
@@ -179,3 +179,6 @@ class AsignacionContinua:
 		resultado = cantCeldasLibres >= tamanio
 		print("Hay lugar en memoria ----->"+str(resultado)+"\n")
 		return resultado
+
+    def crearMMU(self,memoria):
+        return MMU(memoria)

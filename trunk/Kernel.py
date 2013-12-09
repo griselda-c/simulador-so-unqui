@@ -24,7 +24,7 @@ class Kernel():
 
     def kill(self, pcb):
         self.pcbTable.remove(pcb)
-        self.memory.delete(pcb,self.plp.mode)
+        self.memory.delete(pcb)
         print("se elimino el PCB " + str(pcb.pid)+"\n")
         self.plp.enviarLosEsperando()
         
