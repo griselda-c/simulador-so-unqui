@@ -1,6 +1,7 @@
 
 from Block import *
 from Compactador import *
+from MMU import *
 
 class AsignacionContinua:
     def __init__(self,typeFit):
