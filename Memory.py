@@ -14,7 +14,7 @@ class Memory:
         
             
     def addInstruction(self,index,instruction):
-        print("en el indice " +str(index) + " se guardo instruccion " +str(instruction)+"\n")
+        print("en el indice " +str(index) + " se guardo instruccion " +str(instruction)+"del pcb " +str(instruction.pcb.pid)+"\n")
         self.celdas[index] = instruction
         
     def hayLugar(self,tamanio):

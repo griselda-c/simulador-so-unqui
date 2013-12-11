@@ -7,7 +7,7 @@ Created on 24/10/2013
 class Disco:
     def __init__(self):
         self.programas = {}
-        self.paginas = []
+        self.paginas = {}
 
     def addProgram(self,p):
         self.programas[p.nombre] = p
@@ -19,9 +19,18 @@ class Disco:
         #return self.programa(nomProg)   
 
     def addPagina(self,pag):
-        self.paginas.append(pag)
-'''
+        #self.paginas.append(pag)
+        pcbID = pag.getPcb().pid
+        if self.paginas.has_key(pcbID):
+            lista = self.paginas[pcbID]
+            lista.append(pag)
+        else:
+            self.paginas[pcbID] = [pag]
+
     def getPagina(self,pag):
-        return self.programas[nomProg]
-        #return self.programa(nomProg) 
-'''
+        pcbId = pag.getPcb().pid
+        listaPaginas = self.paginas[pcbId]
+        indice = listaPaginas.index(pag, )
+        return listaPaginas[indice]
+        
+        
