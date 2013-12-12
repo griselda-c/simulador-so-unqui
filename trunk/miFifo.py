@@ -16,6 +16,9 @@ class miFifo():
             element = self.ls.pop(0)
         self.semaphore.release()
         return element
+    
+    def remove(self,element):
+        self.ls.remove(element)
         
 
     def addElement(self, elem):       
