@@ -13,7 +13,6 @@ class Paginacion:
         #self.mmu.tamanioPag = self.tamanioPag
         
     def crearLibres(self,limit):
-        print("METODO: crearLibres")
         contador = 0
         nroPag = 0
         while contador < limit:
@@ -22,13 +21,8 @@ class Paginacion:
             nroPag = nroPag + 1
             contador = nroPag * self.tamanioPag
         print("Cantidad Paginas totales en memoria: "+str(self.listaMarcosLibres.size()))
-        #self.imprimirPaginasVacias()
 
 
-    def imprimirPaginasVacias(self):
-        for pagina in self.listaMarcosLibres.ls:
-            print("pagina nro "+str(pagina.id))
-            
     def calcularIndice(self, pagina):
         indexEnMemoria = pagina.id * self.tamanioPag
         return indexEnMemoria
@@ -37,7 +31,6 @@ class Paginacion:
         pagina.setPcb(pcb)
 
     def guardar(self,memoria,programa,pcb):
-        print("METODO: guardar")
         marcos = self.buscoMarcosVacio(programa.getCantInst(),memoria)
         instrucciones = programa.instrucciones
         indiceLista = 0
@@ -51,16 +44,12 @@ class Paginacion:
             
         self.mmu.cargarPaginaEnTabla(pcb,marcos)
         
-        #for pagina in marcos:
-        #    self.listaMarcosOcupados.addElement(pagina)
-            
         print("se cargo el programa en memoria\n")
         
 
     def cargoInstrucciones(self,instrucciones,index,pcb,memoria,pagina):
         print("METODO: cargoInstrucciones del pcb "+str(pcb.pid))
         i = 0
-        print("Cantidad Instrucciones: " + str(len(instrucciones)))
         while i < len(instrucciones) and i < pagina.tamanio:
             instruccion = instrucciones[i]
             instruccion.setPcb(pcb)
@@ -79,11 +68,9 @@ class Paginacion:
 
 
     def guardarMarcoEnOcupado(self, marco):
-        print("la pagina "+str(marco.id)+" esta en ocupados")
         return self.listaMarcosOcupados.addElement(marco)
 
     def buscoMarcosVacio(self,CantidadInstrucciones,memoria): #saque el pcb
-        print("METODO: buscoMarcosVacio")
         cantidadPag = self.cantPagNecesarias(CantidadInstrucciones)
         marcosVacios = []
         
@@ -99,7 +86,6 @@ class Paginacion:
         return marcosVacios    
     
     def cantPagNecesarias(self,cantidadInstrucciones):
-        print("METODO: cantPagNecesarias")
         cantidadPag = cantidadInstrucciones // self.tamanioPag
         if(cantidadInstrucciones % self.tamanioPag) > 0:
             cantidadPag = cantidadPag + 1
@@ -111,17 +97,18 @@ class Paginacion:
         for pagina in listaPag:
             direInicioPag = pagina.id * self.tamanioPag
             self.limpioCeldas(direInicioPag,memoria,pagina)
-        for pagina in listaPag:
             self.listaMarcosLibres.addElement(pagina)
             self.listaMarcosOcupados.getElement()
+       # for pagina in listaPag:
+        #    self.listaMarcosLibres.addElement(pagina)
+            #self.listaMarcosOcupados.getElement()
         self.mmu.borrarDeTabla(pcb)
 
         
     def limpioCeldas(self,direInicioPag,memoria,pagina):
-        print("METODO: limpioCeldas")
         i = 0
         direction = direInicioPag
-        while i < len(pagina.instrucciones):
+        while i < len(pagina.instrucciones) and i<pagina.tamanio:
             del memoria.celdas[direction]
             print("Se libero la celda----> "+str(direction)) #+" del pcb ---->" +str(pcb.pid)+"\n")
             i = i + 1
@@ -162,7 +149,7 @@ class Paginacion:
         self.cargoInstrucciones(pagina.instrucciones, indice, pcb, memoria, marcoNuevo)
         self.mmu.modificarTabla(pcb,paginaRecuperada,marcoNuevo)
         print("Se hizo swap in de la pagina "+str(paginaRecuperada.id)+" del pcb "+str(pcb.pid))
-        #ahora hay que cargar en memoria
+
         
     def crearMMU(self,memoria):
         mmu = MMU_paginacion(memoria,self.tamanioPag,self)
