@@ -98,19 +98,25 @@ class Paginacion:
             direInicioPag = pagina.id * self.tamanioPag
             self.limpioCeldas(direInicioPag,memoria,pagina)
             self.listaMarcosLibres.addElement(pagina)
-            self.listaMarcosOcupados.getElement()
+            self.listaMarcosOcupados.remove(pagina)
        # for pagina in listaPag:
         #    self.listaMarcosLibres.addElement(pagina)
             #self.listaMarcosOcupados.getElement()
         self.mmu.borrarDeTabla(pcb)
 
         
+
+    def borrarCelda(self, memoria, direction):
+        if memoria.celdas.has_key(direction):
+            del memoria.celdas[direction]
+            print("Se libero la celda----> "+str(direction))
+
     def limpioCeldas(self,direInicioPag,memoria,pagina):
         i = 0
         direction = direInicioPag
+        print("LIMPIO CELDAS DE LA PAGINA "+str(pagina.id)+" del pcb " +str(pagina.pcb.pid))
         while i < len(pagina.instrucciones) and i<pagina.tamanio:
-            del memoria.celdas[direction]
-            print("Se libero la celda----> "+str(direction)) #+" del pcb ---->" +str(pcb.pid)+"\n")
+            self.borrarCelda(memoria, direction)
             i = i + 1
             direction = direction +1
         print("Borre de memoria!!\n")
