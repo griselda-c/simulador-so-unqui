@@ -26,10 +26,8 @@ class ModificadorDeCeldas:
                 self.agregarAModificados(primeroNuevo,memory.celdas[primeroNuevo])
             
             memory.celdas[primeroNuevo] = elemento
-            #print("en el indice "+str(primeroNuevo)+" se guardo "+str(elemento))
             primero+= 1
             primeroNuevo+= 1
-            print("el ultimo indice fue ....................................." +str(primeroNuevo))
         
         
     

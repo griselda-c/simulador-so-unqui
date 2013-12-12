@@ -28,9 +28,9 @@ import time
 firstFit = FirstFit()
 worstFit = WorstFit()
 continua = AsignacionContinua(firstFit)
-memoria = Memory(continua,10)
-mmu = MMU(memoria)
-cpu = CPU(mmu)
+asignador = Asignador(continua)
+memoria = Memory(10,asignador)
+cpu = CPU(asignador)
 
 #sh = SchedulerFifo(cpu)
 robin = RoundRobin(cpu)
