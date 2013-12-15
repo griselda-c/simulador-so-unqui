@@ -16,10 +16,8 @@ class Disco:
     def getPrograma(self,nomProg):
     #busco el programa en la lista
         return self.programas[nomProg]
-        #return self.programa(nomProg)   
 
     def addPagina(self,pag):
-        #self.paginas.append(pag)
         pcbID = pag.getPcb().pid
         if self.paginas.has_key(pcbID):
             lista = self.paginas[pcbID]

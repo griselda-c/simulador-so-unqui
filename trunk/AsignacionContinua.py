@@ -30,6 +30,8 @@ class AsignacionContinua:
     def yaSeUnioConElBloqueDeArriba(self,bloque):
         return not self.blockFree.__contains__(bloque) #si es false es porque se unio con el bloque de arriba entonces el indice no cambia
         
+    #busca en la lista de bloques usados el bloque a eliminar, lo borra de la lista y lo retorna
+    #para que pueda ser guardado en la lista de bloques libres
     def getBloqueUsado(self,bloqueInicio):
         bloqueRetornado = None
         for bloque in self.blockBusy:

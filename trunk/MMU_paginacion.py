@@ -13,9 +13,12 @@ class MMU_paginacion():
     def buscarEnMemoria(self, pcb, pagina):
         desplazamiento = pcb.pc % self.tamanioPag
         direction = (pagina.id * self.tamanioPag) + desplazamiento
-        print "fetch de la instruccion que esta en la direccion-----> " + str(direction)+"del pcb "+str(pcb.pid)
+        print "fetch de la instruccion que esta en la direccion-----> " + str(direction)+" del pcb "+str(pcb.pid)
         instruction = self.memory.celdas[direction]
         return instruction
+    
+    def getDireccionFisicaPagina(self,pagina):
+        return pagina.id * self.tamanioPag
 
 
     def getPagina(self, pcb):

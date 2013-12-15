@@ -22,7 +22,12 @@ class Pagina:
         return len(self.instrucciones)
     
     def setPcb(self,pcb):
+        print("A la pagina-----> "+str(self.id)+"Se seteo el pcb --->"+str(pcb.pid))
         self.pcb = pcb
         
     def getPcb(self):
         return self.pcb
+    
+    def limpiarPagina(self):
+        self.pcb = None
+        self.instrucciones = []
