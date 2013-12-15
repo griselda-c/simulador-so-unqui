@@ -14,7 +14,7 @@ class Memory:
         
             
     def addInstruction(self,index,instruction):
-        print("en el indice " +str(index) + " se guardo instruccion " +str(instruction)+"del pcb " +str(instruction.pcb.pid)+"\n")
+        print("en la celda  " +str(index) + " se guardo instruccion " +str(instruction)+" del pcb " +str(instruction.pcb.pid)+"\n")
         self.celdas[index] = instruction
         
     def hayLugar(self,tamanio):
@@ -23,6 +23,11 @@ class Memory:
     def load(self,programa,pcb):
         modo = self.asignador.getModo()
         modo.guardar(self,programa,pcb)
+        
+        
+    def deleteCell(self,direction):
+        print("Se borro celda ------>" +str(direction))
+        del self.celdas[direction]
         
             
     def delete(self,pcb):

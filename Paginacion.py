@@ -44,19 +44,19 @@ class Paginacion:
             
         self.mmu.cargarPaginaEnTabla(pcb,marcos)
         
-        print("se cargo el programa en memoria\n")
         
 
     def cargoInstrucciones(self,instrucciones,index,pcb,memoria,pagina):
-        print("METODO: cargoInstrucciones del pcb "+str(pcb.pid))
         i = 0
-        while i < len(instrucciones) and i < pagina.tamanio:
+        print("CANTIDAD DE INSTRUCCIONES " +str(len(instrucciones))+"PAGINA TAMANIO "+str(pagina.tamanio))
+        while i < len(instrucciones)and i < pagina.tamanio: #pagina.tamanio
             instruccion = instrucciones[i]
             instruccion.setPcb(pcb)
             memoria.addInstruction(index, instruccion)
             pagina.addInstruccion(instruccion)
             index = index + 1
             i = i + 1
+        self.guardarMarcoEnOcupado(pagina)
     
 
     def getMarcoVacio(self,memoria):
@@ -76,66 +76,58 @@ class Paginacion:
         
         for index in range(0,cantidadPag):
             marco = self.getMarcoVacio(memoria) # si no hay lugar hace swap out
-            self.guardarMarcoEnOcupado(marco)
             marcosVacios.append(marco)
-            
-        print("Se tomaron : "+str(len(marcosVacios)) +" marcos, quedan libres "+str(self.listaMarcosLibres.size())+" marcos\n")
-        for pagina in range(0,len(marcosVacios)):
-            print("Marco : "+str(marcosVacios[pagina]))
-            
+             
         return marcosVacios    
     
     def cantPagNecesarias(self,cantidadInstrucciones):
         cantidadPag = cantidadInstrucciones // self.tamanioPag
         if(cantidadInstrucciones % self.tamanioPag) > 0:
             cantidadPag = cantidadPag + 1
-        print("Necesito " + str(cantidadPag) + " paginas vacias")
         return cantidadPag
 
     def liberar(self,memoria,pcb):
         listaPag = self.mmu.tablaPaginas[pcb.pid]
+        print("CANTIDAD DE PAGINAS A LIBERAR " +str(len(listaPag)))
         for pagina in listaPag:
-            direInicioPag = pagina.id * self.tamanioPag
+            direInicioPag = self.mmu.getDireccionFisicaPagina(pagina)
             self.limpioCeldas(direInicioPag,memoria,pagina)
+            self.limpiarPagina(pagina)
             self.listaMarcosLibres.addElement(pagina)
             self.listaMarcosOcupados.remove(pagina)
-       # for pagina in listaPag:
-        #    self.listaMarcosLibres.addElement(pagina)
-            #self.listaMarcosOcupados.getElement()
         self.mmu.borrarDeTabla(pcb)
 
         
-
+    def limpiarPagina(self,pagina):
+        pagina.limpiarPagina()
+        
     def borrarCelda(self, memoria, direction):
-        if memoria.celdas.has_key(direction):
-            del memoria.celdas[direction]
-            print("Se libero la celda----> "+str(direction))
+       memoria.deleteCell(direction)
 
     def limpioCeldas(self,direInicioPag,memoria,pagina):
         i = 0
         direction = direInicioPag
-        print("LIMPIO CELDAS DE LA PAGINA "+str(pagina.id)+" del pcb " +str(pagina.pcb.pid))
-        while i < len(pagina.instrucciones) and i<pagina.tamanio:
+        print("LIMPIO CELDAS DE LA PAGINA----> "+str(pagina.id)+" del pcb ----->" +str(pagina.pcb.pid)+" que tiene cant instrucciones "+str(len(pagina.instrucciones)))
+        while i < len(pagina.instrucciones): 
             self.borrarCelda(memoria, direction)
             i = i + 1
             direction = direction +1
-        print("Borre de memoria!!\n")
+
 
     def hayLugar(self,tamanio,limit,memoria):
         resultado = True
-        print("Hay lugar en memoria ----->"+str(resultado)+"\n")
         return resultado
 
     def swapOut(self,memoria):
         print("METODO: SWAPOUT  !!!!!!!!!!!!!!")
         pagina = self.listaMarcosOcupados.getElement() # FIFO para la pagina victima
-        print("pagina victima ------>"+str(pagina.id))
+        print("PAGINA VICTIMA ------>"+str(pagina.id))
         
         pagina.setBit(0)
         self.disco.addPagina(pagina) # se baja a disco
         paginaLimpia = Pagina(pagina.id,self.tamanioPag)
         self.listaMarcosLibres.addElement(paginaLimpia)
-        direInicioPag = pagina.id * self.tamanioPag
+        direInicioPag = self.mmu.getDireccionFisicaPagina(pagina)
         self.limpioCeldas(direInicioPag,memoria,pagina)
         
     def buscarPaginaEnDisco(self,pagina):
@@ -152,10 +144,9 @@ class Paginacion:
         indice = self.calcularIndice(marcoNuevo)
         
         self.setearPcbALaPagina(marcoNuevo, pcb)
-        self.cargoInstrucciones(pagina.instrucciones, indice, pcb, memoria, marcoNuevo)
+        self.cargoInstrucciones(paginaRecuperada.instrucciones, indice, pcb, memoria, marcoNuevo)
         self.mmu.modificarTabla(pcb,paginaRecuperada,marcoNuevo)
-        print("Se hizo swap in de la pagina "+str(paginaRecuperada.id)+" del pcb "+str(pcb.pid))
-
+       
         
     def crearMMU(self,memoria):
         mmu = MMU_paginacion(memoria,self.tamanioPag,self)

@@ -19,7 +19,6 @@ class Timer(threading.Thread):
         self.irqManager = irqManager
         
     def evaluar(self):
-       #self.semaforo.acquire() #agregue los semaforos
         instruction = self.cpu.fetch()
         if instruction != None:
             instruction.execute(self.cpu) #ejecuta la instruccion
@@ -27,7 +26,6 @@ class Timer(threading.Thread):
             # no hay pcb asignado por eso se llama irqNew
             irqNew = IRQNEW()
             self.irqManager.handle(irqNew,None) #necesita un irq y un pcb
-        #self.semaforo.release()
             
         time.sleep(5)
 
